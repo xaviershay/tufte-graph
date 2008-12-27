@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+  <head>
+    <title>TufteGraph: beautiful charts with jQuery</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.tufte-graph.js"></script>
+    <link rel="stylesheet" href="tufte-graph.css" type="text/css" media="screen" charset="utf-8" />
+
+    <style>
+      body { font-family: georgia; font-size: 14px }
+      #awesome-graph { width: 400px; height: 200px; }
+      span.doc { color: green; font-weight: bold; }
+      a { color: black; }
+      a:visited { color: gray; }
+    </style>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $.tufteBar($('#awesome-graph'), {
+          data: [
+            [1.0, {label: 'Dog'}],
+            [1.3, {label: 'Raccoon'}],
+            [3.6, {label: 'Albatross'}],
+            [4.0, {label: 'Panda'}],
+            [5.2, {label: 'Tiger'}],
+            [7.0, {label: 'Raptor'}]
+          ],
+          barWidth: 0.8,
+          barLabel:  function(element, index) { return element[0] + 'x' },
+          axisLabel: function(element, index) { return element[1].label },
+          color:     function(element, index) { return ['#E57536', '#82293B'][index % 2] }
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>TufteGraph</h1>
+    <p>Make pretty graphs with javascript, using jQuery and the <code>&lt;canvas&gt;</code> element. It is different from other charting libraries because:</p>
+    <ul>
+      <li>Configuration is by dynamic functions, allowing for really compact API (very few options)</li>
+      <li>Layout is done via CSS rather than code</li>
+    </ul>
+    <h2>Example</h2>
+    <div class='graph-header'>
+      <h3>Animal awesomeness</h3>
+      <p>Measured by standard combo multiplier</p>
+    </div>
+        
+    <div id='awesome-graph' class='graph' style='width: 400px; height: 200px;'></div>
+    <h2>API</h2>
+    
+<pre><code>$(document).ready(function () {
+  $.tufteBar($('#awesome-graph'), {
+    data: [
+      <span class="doc">// First element is the y-value</span>
+      <span class="doc">// Other elements are arbitary - they are not used by the lib but are passed back into callback functions</span>
+      [1.0, {label: 'Dog'}],
+      [1.3, {label: 'Raccoon'}]
+      // etc...
+    ],
+
+    <span class="doc">// Bar width in arbitrary units, 1.0 means the bars will be snuggled up next to each other</span>
+    barWidth: 0.8, 
+
+    <span class="doc">// The label on top of the bar - can contain HTML (it goes in a DIV)</span>
+    barLabel:  function(element, index) { return element[0] + 'x' }, 
+
+    <span class="doc">// The label on the x-axis - can contain HTML (it goes in a DIV)</span>
+    axisLabel: function(element, index) { return element[1].label }, 
+
+    <span class="doc">// The color of the bar</span>
+    color:     function(element, index) { return ['#E57536', '#82293B'][index % 2] }
+  });
+});
+</code></pre>
+  <h2>Hot Tips</h2>
+  <ul>
+    <li>You need to be using <code><a href="http://jquery.com">jQuery</a></code>. View source on this page if you don't quite get it.</li>
+    <li>It only does simple bar charts.</li>
+    <li>By default your graph won't be that pretty because it needs to be styled. I recommend <code>tufte-graph.css</code> as a good starting point.</li>
+    <li>Read Tufte's <a href="http://books.google.com.au/books?id=JNoBAAAACAAJ">The Visual Display of Quantitative Information</a>, it'll blow your mind. Your graphs will never be the same again.</li>
+    <li><a href="mailto:contact@rhnh.net">Email me</a> the cool graphs you make, I really dig graphs.</li>
+    <li>If you're going to make changes to this library, please fork on github and share the love.</li>
+  </body>
+</html>

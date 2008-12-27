@@ -1,0 +1,23 @@
+.graph {
+  margin-bottom: 50px;
+  margin-top: 20px;
+  clear: both;
+  font-family: georgia, serif;
+  font-size: 14px;
+}
+
+.graph .label {
+  text-align: center;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.graph-header h3 {
+  margin-bottom: 0px;
+}
+.graph-header {
+  text-align: center;
+  width: 400px;
+}
+.graph-header p {
+  margin-top: 0px;
+}
