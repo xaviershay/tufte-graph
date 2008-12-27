@@ -16,7 +16,8 @@
 
   $.fn.tufteBar.defaults = {
     barWidth:  0.8,
-    color:     function(element, index, stackedIndex) { return ['#07093D', '#0C0F66', '#476fb2'][stackedIndex % 3]; },
+    colors:    ['#07093D', '#0C0F66', '#476FB2'],
+    color:     function(element, index, stackedIndex) { return $.fn.tufteBar.defaults.colors[stackedIndex % 3]; },
     barLabel:  function(element, index, stackedIndex) { return sum(element[0]); },
     axisLabel: function(element, index, stackedIndex) { return index; }
   }
