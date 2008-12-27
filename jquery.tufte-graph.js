@@ -1,11 +1,12 @@
 // I borrowed liberally from flot - it's good at other types of graphs
 (function($) {
-  $.tufteBar = function( target, data ) {
-    var plot = new TufteBar( target, data );
-    return plot;
+  $.fn.tufteBar = function( data ) {
+    return this.each(function () {
+      new TufteBar( this, data );
+    });
   }
 
-  $.tufteBar.defaults = {
+  $.fn.tufteBar.defaults = {
     barWidth: 0.8,
     color:     function(element, index) { return '#476fb2'; },
     barLabel:  function(element, index) { return element[0]; },
@@ -13,11 +14,11 @@
   }
 
   function TufteBar( target_, options_ ) {
-    var target = target_;
-    var options = $.extend(true, $.tufteBar.defaults, options_);
+    var target = $(target_);
+    var options = $.extend({}, $.fn.tufteBar.defaults, options_);
 
     var axis = makeAxis(options);
-    var plot = makePlot(plot);
+    var plot = makePlot(target);
 
     draw(target, plot, options);
 
@@ -67,7 +68,7 @@
     function tX( x ) { return               ( x - axis.x.min ) * (plot.width  / (axis.x.max - axis.x.min)); }
     function tY( y ) { return plot.height - ( y - axis.y.min ) * (plot.height / (axis.y.max - axis.y.min)); }
 
-    function makePlot() {
+    function makePlot(target) {
       var plot = {};
       plot.width = target.width();
       plot.height = target.height();
