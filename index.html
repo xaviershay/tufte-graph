@@ -19,6 +19,9 @@
       }
 
       
+      .intro { font-size: 1.4em; }
+      .differences { clear: both; }
+
       span.doc { color: green; font-weight: bold; }
       a { color: black; }
       a:visited { color: gray; }
@@ -76,11 +79,7 @@
         <a href="jquery.tufte-graph.js">Download</a>
       </div>
     <h1>TufteGraph</h1>
-    <p><strong>Make pretty graphs with javascript</strong>, using <a href="http://jquery.com">jQuery</a> and the <code>&lt;canvas&gt;</code> element. It is different from other charting libraries because:</p>
-    <ul>
-      <li>Configuration is by dynamic functions, allowing for really compact API (very few options)</li>
-      <li>Non-core layout is done via CSS rather than code</li>
-    </ul>
+    <p class='intro'><strong>Make pretty graphs with javascript</strong>, using <a href="http://jquery.com">jQuery</a> and the <code>&lt;canvas&gt;</code> element</p>
     <div class='example awesome'>
       <div class='graph-header'>
         <h3>Animal awesomeness</h3>
@@ -95,6 +94,12 @@
       </div>
       <div id='stacked-graph' class='graph' style='width: 270px; height: 200px;'></div>
     </div>  
+
+    <p class='differences'>It is different from other javascript charting libraries because:</p>
+    <ul>
+      <li>Configuration is by dynamic functions, allowing for really compact API (very few options)</li>
+      <li>Non-core layout is done via CSS rather than code</li>
+    </ul>
     <h2>API</h2>
     
 <pre><code>jQuery(document).ready(function () {
