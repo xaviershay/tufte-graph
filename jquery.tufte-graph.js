@@ -33,6 +33,10 @@
   //
   // Private functions
   //
+
+  // This function should be applied to any option used from the options hash.
+  // It allows options to be provided as either static values or functions which are
+  // evaluated each time they are used
   function resolveOption(option, element, index, stackedIndex) {
     return $.isFunction(option) ? option(element, index, stackedIndex) : option;
   }
@@ -41,6 +45,7 @@
     var ctx = plot.ctx;
     var axis = plot.axis;
 
+    // Iterate over each bar
     for (var i = 0; i < options.data.length; ++i) {
       var element = options.data[i];
       var x = i + 0.5,
@@ -48,10 +53,23 @@
 
       var lastY = 0;
 
-      var tX = function(x) { return               ( x - axis.x.min ) * (plot.width  / (axis.x.max - axis.x.min)); }
-      var tY = function(y) { return plot.height - ( y - axis.y.min ) * (plot.height / (axis.y.max - axis.y.min)); }
+      pixel_scaling_function = function(axis) {
+        var scale = axis.pixelLength / (axis.max - axis.min);
+        return function (value) {
+          return (value - axis.min) * scale;
+        }
+      }
+
+      // These functions transform a value from plot coordinates to pixel coordinates
+      var t = {}
+      t.W = pixel_scaling_function(axis.x);
+      t.H = pixel_scaling_function(axis.y);
+      t.X = t.W;
+      // Y needs to invert the result since 0 in plot coords is bottom left, but 0 in pixel coords is top left
+      t.Y = function(y) { return axis.y.pixelLength - t.H(y) }; 
 
       ctx.save();
+      // Iterate over each data point for this bar and render a rectangle for each
       for (var stackedIndex = 0; stackedIndex < all_y.length; stackedIndex++) {
         var optionResolver = function(option) { // Curry resolveOption for convenience
           return resolveOption(option, element, i, stackedIndex);
@@ -61,13 +79,19 @@
         var halfBar = optionResolver(options.barWidth) / 2;
         var left   = x - halfBar,
             width  = halfBar * 2,
-            bottom = lastY,
+            top = lastY + y,
             height = y;
 
-        ctx.fillStyle   = optionResolver(options.color);
-        ctx.strokeStyle = optionResolver(options.color);
-        ctx.fillRect( tX(left), tY(bottom) - (plot.height - tY(height)), tX(width), plot.height - tY(height) );
-        ctx.strokeRect( tX(left), tY(bottom) - (plot.height - tY(height)), tX(width), plot.height - tY(height) );
+        // Need to both fill and stroke the rect to make sure the whole area is covered
+        // You get nasty artifacts otherwise
+        var color = optionResolver(options.color);
+        var coords = [t.X(left), t.Y(top), t.W(width), t.H(height)];
+
+        ctx.fillStyle   = color;
+        ctx.strokeStyle = color;
+        ctx.fillRect(   coords[0], coords[1], coords[2], coords[3] );
+        ctx.strokeRect( coords[0], coords[1], coords[2], coords[3] );
+
         lastY = lastY + y;
       }
       ctx.restore();
@@ -78,19 +102,21 @@
       }
 
       addLabel('bar-label', optionResolver(options.barLabel), {
-        left: tX(x - 0.5),
-        bottom: plot.height - tY(lastY),
-        width: tX(1)
+        left:   t.X(x - 0.5),
+        bottom: t.H(lastY),
+        width:  t.W(1)
       });
       addLabel('axis-label', optionResolver(options.axisLabel), {
-        left: tX(x - 0.5),
-        top: tY(0),
-        width: tX(1)
+        left:  t.X(x - 0.5),
+        top:   t.Y(0),
+        width: t.W(1)
       });
     }
     addLegend(plot, options);
   }
 
+  // If legend data has been provided, transform it into an 
+  // absolutely positioned table placed at the top right of the graph
   function addLegend(plot, options) {
     if (options.legend.data) {
       var data = options.legend.data;
@@ -115,7 +141,10 @@
     }
   }
 
-
+  // Convenience method to sum the values contained in an array
+  // This function is attached to the data points arrays provided
+  // for a stacked bar chart, since most label formatters will want
+  // to use it
   function sum(a) {
     var total = 0;
     $.each(a, function() {
@@ -124,6 +153,8 @@
     return total;
   }
 
+  // Calculates the range of the graph by looking for the 
+  // maximum y-value
   function makeAxis(options) {
     var axis = {
       x: {},
@@ -150,6 +181,7 @@
     return axis;
   }
 
+  // Creates the canvas object to draw on, and set up the axes
   function makePlot(target, options) {
     var plot = {};
     plot.target = target;
@@ -167,6 +199,8 @@
     plot.ctx = canvas.getContext( '2d' );
 
     plot.axis = makeAxis(options);
+    plot.axis.x.pixelLength = plot.width;
+    plot.axis.y.pixelLength = plot.height;
 
     return plot;
   }
