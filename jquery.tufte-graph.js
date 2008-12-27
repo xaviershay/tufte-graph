@@ -3,11 +3,7 @@
     var options = $.extend({}, $.fn.tufteBar.defaults, options);
 
     return this.each(function () {
-      target = $(this);
-      var axis = makeAxis(options);
-      var plot = makePlot(target);
-
-      draw(target, plot, axis, options);
+      draw(makePlot($(this), options), options);
     });
   }
 
@@ -21,8 +17,9 @@
   //
   // Private functions
   //
-  function draw(target, plot, axis, options) {
+  function draw(plot, options) {
     var ctx = plot.ctx;
+    var axis = plot.axis;
 
     for (var i = 0; i < options.data.length; ++i) {
       element = options.data[i];
@@ -51,7 +48,7 @@
 
       addLabel = function(klass, text, pos) {
         html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
-        $(html).css(pos).appendTo( target );        
+        $(html).css(pos).appendTo( plot.target );        
       }
 
       addLabel('bar-label', options.barLabel(element, i), {
@@ -91,8 +88,9 @@
     return axis;
   }
 
-  function makePlot(target) {
+  function makePlot(target, options) {
     var plot = {};
+    plot.target = target;
     plot.width = target.width();
     plot.height = target.height();
     target.html( '' ).css( 'position', 'relative' );
@@ -105,6 +103,9 @@
     canvas = $('<canvas width="' + plot.width + '" height="' + plot.height + '"></canvas>').appendTo( target ).get( 0 );
     if( $.browser.msie ) { canvas = window.G_vmlCanvasManager.initElement( canvas ); }
     plot.ctx = canvas.getContext( '2d' );
+
+    plot.axis = makeAxis(options);
+
     return plot;
   }
 } )( jQuery );
