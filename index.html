@@ -42,11 +42,14 @@
           data: [
             [[1.5, 1.0, 0.51], {label: '2005'}],
             [[2.0, 1.03, 0.6], {label: '2006'}],
-            [[2.4, 0.9, 2.0], {label: '2007'}],
+            [[2.4, 0.9,  2.0], {label: '2007'}],
             [[1.5, 2.6, 0.45], {label: '2008'}]
           ],
           barLabel:  function(element, index) { return '$' + (element[0].sum() * 10000).toFixed(0).toLocaleString() },
-          axisLabel: function(element, index) { return element[1].label }
+          axisLabel: function(element, index) { return element[1].label },
+          legend: {
+            data: ["North", "East", "West"]
+          }
         });
       });
     </script>
@@ -69,7 +72,7 @@
     <div class='example sales'>
       <div class='graph-header'>
         <h3>Sales by region</h3>
-        <p>Legend coming soon!</p>
+        <p>Past 4 years</p>
       </div>
       <div id='stacked-graph' class='graph' style='width: 300px; height: 200px;'></div>
     </div>  
@@ -102,9 +105,23 @@
     axisLabel: function(element, index) { return element[1].label }, 
 
     <span class="doc">// The color of the bar</span>
-    color:     function(element, index) { return ['#E57536', '#82293B'][index % 2] }
+    color:     function(element, index) { return ['#E57536', '#82293B'][index % 2] },
     <span class="doc">// Stacked graphs also pass a stackedIndex parameter</span>
-    color:     function(element, index, stackedIndex) { return ['#E57536', '#82293B'][stackedIndex % 2] }
+    color:     function(element, index, stackedIndex) { return ['#E57536', '#82293B'][stackedIndex % 2] },
+    <span class="doc">// Alternatively, you can just override the default colors and keep the built in color functions</span>
+    colors: ['#82293B', '#E57536', '#FFBE33'],
+ 
+    <span class="doc">// Legend is optional</span>
+    legend: {
+      <span class="doc">// Data can be an array of any type of object, but the default formatter works with strings</span>
+      data: ["North", "East", "West"],
+
+      <span class="doc">// By default, the colors of the graph are used</span>
+      color: function(element, index) { return ['#E57536', '#82293B'][index % 2] },
+
+      <span class="doc">// You can customize the element label - can contain HTML (it goes in a TD)</span>
+      label: function(element, index) { return element }
+    }
   });
 });
 </code></pre>

@@ -9,7 +9,7 @@
 
     <style>
       body { font-family: georgia; font-size 14px; }
-      .test-case { float: left; text-align: center; margin: 10px;}
+      .test-case { float: left; text-align: center; margin-right: 50px;}
       a, a:visited { color: black; }
       h2 { font-size: 1.2em; clear: both;}
     </style>
@@ -70,6 +70,32 @@
             return (e[1].colors || ['#82293B', '#E57536', '#FFBE33'])[stackedIndex % 3] 
           }
         });
+
+        jQuery('#legend-defaults-graph').tufteBar({
+          data: stackedTestData,
+          legend: {
+            data: ["A", "B", "C"]
+          }
+        });
+
+        jQuery('#legend-dynamic-graph').tufteBar({
+          data: stackedTestData,
+          legend: {
+            data: ["A", "B", "C"],
+            label: function(e, i) { return e + i },
+            color: function(e, i) { 
+              return ['#82293B', '#E57536', '#FFBE33'][i % 3] 
+            }
+          }
+        });
+
+        jQuery('#legend-colors-graph').tufteBar({
+          data: stackedTestData,
+          colors: ['#82293B', '#E57536', '#FFBE33'],
+          legend: {
+            data: ["A", "B", "C"]
+          }
+        });
       });
     </script>
   </head>
@@ -96,6 +122,19 @@
     <div class='test-case'>
       <h3>Dynamic</h3>
       <div id='stacked-dynamic-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
+    <h2>Legends</h2>
+    <div class='test-case'>
+      <h3>Default</h3>
+      <div id='legend-defaults-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
+    <div class='test-case'>
+      <h3>Dynamic</h3>
+      <div id='legend-dynamic-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
+    <div class='test-case'>
+      <h3>Use graph colors</h3>
+      <div id='legend-colors-graph' class='graph' style='width:200px; height: 150px'></div>
     </div>
   </body>
 </html>  

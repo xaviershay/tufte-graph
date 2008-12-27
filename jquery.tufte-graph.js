@@ -1,6 +1,10 @@
 (function($) {
   $.fn.tufteBar = function(options) {
-    var options = $.extend({}, $.fn.tufteBar.defaults, options);
+    // This crazy method ensures a recursive merge without clobbering the defaults hash
+    // There must be a better way to do this (clone?)
+    var defaultCopy = $.extend({}, $.fn.tufteBar.defaults, {});
+    var options = $.extend(true, defaultCopy, options);
+
     // Transform normal bar data into data for a stacked bar, by making
     // the y-value into an array
     options.data = $.map(options.data, function(element) {
@@ -17,9 +21,13 @@
   $.fn.tufteBar.defaults = {
     barWidth:  0.8,
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
-    color:     function(element, index, stackedIndex) { return $.fn.tufteBar.defaults.colors[stackedIndex % 3]; },
+    color:     function(element, index, stackedIndex) { return $.fn.tufteBar.defaults.colors[stackedIndex % $.fn.tufteBar.defaults.colors.length]; },
     barLabel:  function(element, index, stackedIndex) { return sum(element[0]); },
-    axisLabel: function(element, index, stackedIndex) { return index; }
+    axisLabel: function(element, index, stackedIndex) { return index; },
+    legend: {
+      color: function(e, i) { return $.fn.tufteBar.defaults.colors[i % $.fn.tufteBar.defaults.colors.length]; },
+      label: function(e, i) { return e; }
+    }
   }
 
   //
@@ -80,7 +88,33 @@
         width: tX(1)
       });
     }
+    addLegend(plot, options);
   }
+
+  function addLegend(plot, options) {
+    if (options.legend.data) {
+      var data = options.legend.data;
+
+      elements = [];
+      for (var i = data.length - 1; i >= 0; i--) {
+        var element = data[i];
+        var optionResolver = function(option) { // Curry resolveOption for convenience
+          return resolveOption(option, element, i, null);
+        }
+
+        var colorBox = '<div class="color-box" style="background-color:' + optionResolver(options.legend.color) + '"></div>';
+        var label = optionResolver(options.legend.label);
+
+        elements += ["<tr><td>" + colorBox + "</td><td>" + label + "</td></tr>"];
+      }
+      $('<table class="legend">' + elements + '</table>').css({
+        position: 'absolute',
+        top:  '0px',
+        left: plot.width + 'px'
+      }).appendTo( plot.target );
+    }
+  }
+
 
   function sum(a) {
     var total = 0;
