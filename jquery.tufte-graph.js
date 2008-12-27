@@ -7,6 +7,14 @@
     });
   }
 
+  $.fn.tufteStackedBar = function(options) {
+    var options = $.extend({}, $.fn.tufteStackedBar.defaults, options);
+
+    return this.each(function () {
+      drawStacked(makePlot($(this), options), options);
+    });
+  }
+
   $.fn.tufteBar.defaults = {
     barWidth:  0.8,
     color:     '#476fb2',
@@ -14,11 +22,71 @@
     axisLabel: function(element, index) { return index; }
   }
 
+  $.fn.tufteStackedBar.defaults = {
+    barWidth:  0.8,
+    color:     function(element, index, stackedIndex) { return ['#07093D', '#0C0F66', '#476fb2'][stackedIndex % 3]; },
+    barLabel:  function(element, index) { return sum(element[0]); },
+    axisLabel: function(element, index) { return index; }
+  }
+
   //
   // Private functions
   //
-  function resolveOption(option, element, index) {
-    return $.isFunction(option) ? option(element, index) : option;
+  function resolveOption(option, element, index, stackedIndex) {
+    return $.isFunction(option) ? option(element, index, stackedIndex) : option;
+  }
+
+  function drawStacked(plot, options) {
+    var ctx = plot.ctx;
+    var axis = plot.axis;
+
+    for (var i = 0; i < options.data.length; ++i) {
+      var element = options.data[i];
+      var x = i + 0.5,
+          all_y = element[0];
+
+      var lastY = 0;
+
+      var tX = function(x) { return               ( x - axis.x.min ) * (plot.width  / (axis.x.max - axis.x.min)); }
+      var tY = function(y) { return plot.height - ( y - axis.y.min ) * (plot.height / (axis.y.max - axis.y.min)); }
+
+      ctx.save();
+      for (var stackedIndex = 0; stackedIndex < all_y.length; stackedIndex++) {
+        var optionResolver = function(option) { // Curry resolveOption for convenience
+          return resolveOption(option, element, i, stackedIndex);
+        }
+
+        var y = all_y[stackedIndex];
+        var halfBar = optionResolver(options.barWidth) / 2;
+        var left   = x - halfBar,
+            width  = halfBar * 2,
+            bottom = lastY,
+            height = y;
+
+        ctx.fillStyle   = optionResolver(options.color);
+        ctx.strokeStyle = optionResolver(options.color);
+        ctx.fillRect( tX(left), tY(bottom) - (plot.height - tY(height)), tX(width), plot.height - tY(height) );
+        ctx.strokeRect( tX(left), tY(bottom) - (plot.height - tY(height)), tX(width), plot.height - tY(height) );
+        lastY = lastY + y;
+      }
+      ctx.restore();
+
+      addLabel = function(klass, text, pos) {
+        html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
+        $(html).css(pos).appendTo( plot.target );        
+      }
+
+      addLabel('bar-label', optionResolver(options.barLabel), {
+        left: tX(x - 0.5),
+        bottom: plot.height - tY(lastY),
+        width: tX(1)
+      });
+      addLabel('axis-label', optionResolver(options.axisLabel), {
+        left: tX(x - 0.5),
+        top: tY(0),
+        width: tX(1)
+      });
+    }
   }
 
   function draw(plot, options) {
@@ -72,6 +140,14 @@
     }
   }
 
+  function sum(a) {
+    var total = 0;
+    $.each(a, function() {
+      total += this;
+    });
+    return total;
+  }
+
   function makeAxis(options) {
     var axis = {
       x: {},
@@ -86,6 +162,8 @@
     for (var i = 0; i < options.data.length; ++i) {
       element = options.data[i];
       var y = element[0]; // TODO: Support non-array y values
+      if (y.length)
+        y = sum(y); // To support data for stacked bar
       if( y < axis.y.min )      throw("Negative values not supported");
       if( y > axis.y.max )      axis.y.max = y;
     }

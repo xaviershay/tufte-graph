@@ -11,7 +11,7 @@
       body { font-family: georgia; font-size 14px; }
       .test-case { float: left; text-align: center; margin: 10px;}
       a, a:visited { color: black; }
-      h2 { font-size: 1.2em; }
+      h2 { font-size: 1.2em; clear: both;}
     </style>
 
     <script type="text/javascript">
@@ -46,22 +46,38 @@
             return e[1].color || ['#E57536', '#82293B'][i % 2] 
           }
         });
+
+        stackedTestData = [
+          [[2.0, 1.0, 0.6], {label: 'A'}],
+          [[2.4, 0.9, 2.0], {label: 'B'}],
+          [[1.5, 2.6, 0.4], {label: 'C'}]
+        ]
+
+        jQuery('#stacked-defaults-graph').tufteStackedBar({
+          data: stackedTestData
+        });
       });
     </script>
   </head>
   <body>
     <a href="../index.html"><h1>TufteGraph: Integration Tests</h1></a>
+    <h2>Bar</h2>
     <div class='test-case'>
-      <h2>All defaults</h2>
+      <h3>Default</h3>
       <div id='defaults-graph' class='graph' style='width:200px; height: 150px'></div>
     </div>
     <div class='test-case'>
-      <h2>Static properties</h2>
+      <h3>Static properties</h3>
       <div id='static-properties-graph' class='graph' style='width:200px; height: 150px'></div>
     </div>
     <div class='test-case'>
-      <h2>Dynamic properties</h2>
+      <h3>Dynamic properties</h3>
       <div id='dynamic-properties-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
+    <h2>Stacked Bar</h2>
+    <div class='test-case'>
+      <h3>Default</h3>
+      <div id='stacked-defaults-graph' class='graph' style='width:200px; height: 150px'></div>
     </div>
   </body>
 </html>  
