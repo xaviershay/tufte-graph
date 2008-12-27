@@ -26,9 +26,9 @@
       h2 { clear: both; }
 
       .awesome .graph-header { width: 370px; }
-      .sales   .graph-header { width: 300px; }
+      .sales   .graph-header { width: 310px; }
 
-      .sales { margin-left: 30px; }
+      .sales { margin-left: 20px; }
       li { margin-bottom: 3px; }
     </style>
 
@@ -56,7 +56,12 @@
             [[2.4, 0.9,  2.0], {label: '2007'}],
             [[1.5, 2.6, 0.45], {label: '2008'}]
           ],
-          barLabel:  function(element, index) { return '$' + (element[0].sum() * 10000).toFixed(0).toLocaleString() },
+          barLabel:  function(element, index) {
+            // This is a simplistic algorithm for demo only
+            // Do not use in production code
+            amount = (element[0].sum() * 10000).toFixed(0);
+            return '$' + amount.slice(0, 2) + ',' + amount.slice(2, 5);
+          },
           axisLabel: function(element, index) { return element[1].label },
           legend: {
             data: ["North", "East", "West"]
@@ -86,9 +91,9 @@
     <div class='example sales'>
       <div class='graph-header'>
         <h3>Sales by region</h3>
-        <p>Past 4 years</p>
+        <p>Total revenue per year</p>
       </div>
-      <div id='stacked-graph' class='graph' style='width: 250px; height: 200px;'></div>
+      <div id='stacked-graph' class='graph' style='width: 270px; height: 200px;'></div>
     </div>  
     <h2>API</h2>
     
