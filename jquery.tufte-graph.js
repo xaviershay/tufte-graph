@@ -4,7 +4,9 @@
     // Transform normal bar data into data for a stacked bar, by making
     // the y-value into an array
     options.data = $.map(options.data, function(element) {
-      return [[element[0].length ? element[0] : [element[0]], element[1]]];
+      var ret = [[element[0].length ? element[0] : [element[0]], element[1]]];
+      ret[0][0].sum = function () { return sum(ret[0][0]); };
+      return ret;
     });
 
     return this.each(function () {
