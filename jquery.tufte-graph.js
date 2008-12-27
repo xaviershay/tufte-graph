@@ -8,8 +8,8 @@
   }
 
   $.fn.tufteBar.defaults = {
-    barWidth: 0.8,
-    color:     function(element, index) { return '#476fb2'; },
+    barWidth:  0.8,
+    color:     '#476fb2',
     barLabel:  function(element, index) { return element[0]; },
     axisLabel: function(element, index) { return index; }
   }
@@ -17,17 +17,25 @@
   //
   // Private functions
   //
+  function resolveOption(option, element, index) {
+    return $.isFunction(option) ? option(element, index) : option;
+  }
+
   function draw(plot, options) {
     var ctx = plot.ctx;
     var axis = plot.axis;
 
     for (var i = 0; i < options.data.length; ++i) {
-      element = options.data[i];
+      var element = options.data[i];
+      var optionResolver = function(option) { // Curry resolveOption for convenience
+        return resolveOption(option, element, i);
+      }
+
 
       var x = i + 0.5,
           y = element[0];
 
-      var halfBar = options.barWidth / 2;
+      var halfBar = optionResolver(options.barWidth) / 2;
       var left   = x - halfBar,
           right  = x + halfBar,
           bottom = 0,
@@ -37,7 +45,7 @@
       tY = function(y) { return plot.height - ( y - axis.y.min ) * (plot.height / (axis.y.max - axis.y.min)); }
 
       ctx.save();
-      ctx.fillStyle = options.color(element, i);
+      ctx.fillStyle = optionResolver(options.color);
       ctx.beginPath();
         ctx.moveTo( tX( left ),  tY( bottom) );
         ctx.lineTo( tX( left ),  tY( top) );
@@ -51,12 +59,12 @@
         $(html).css(pos).appendTo( plot.target );        
       }
 
-      addLabel('bar-label', options.barLabel(element, i), {
+      addLabel('bar-label', optionResolver(options.barLabel), {
         left: tX(x - 0.5),
         bottom: plot.height - tY(top),
         width: tX(1)
       });
-      addLabel('axis-label', options.axisLabel(element, i), {
+      addLabel('axis-label', optionResolver(options.axisLabel), {
         left: tX(x - 0.5),
         top: tY(bottom),
         width: tX(1)

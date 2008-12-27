@@ -53,14 +53,18 @@
 <pre><code>jQuery(document).ready(function () {
   jQuery('#awesome-graph').tufteBar({
     data: [
-      <span class="doc">// First element is the y-value</span>
-      <span class="doc">// Other elements are arbitary - they are not used by the lib but are passed back into callback functions</span>
+      <span class="doc">// First element is the y-value
+      // Other elements are arbitary - they are not used by the lib
+      // but are passed back into callback functions</span>
       [1.0, {label: 'Dog'}],
       [1.3, {label: 'Raccoon'}]
       // etc...
     ],
 
-    <span class="doc">// Bar width in arbitrary units, 1.0 means the bars will be snuggled up next to each other</span>
+    <span class="doc">// Any of the following properties can be either static values 
+    // or a function that will be called for each data point
+
+    // Bar width in arbitrary units, 1.0 means the bars will be snuggled up next to each other</span>
     barWidth: 0.8, 
 
     <span class="doc">// The label on top of the bar - can contain HTML (it goes in a DIV)</span>
