@@ -9,16 +9,26 @@
 
     <style>
       body { font-family: georgia; font-size: 14px }
+      #container {
+        margin: 0 auto;
+        width: 730px;
+      }
+      .download {
+        float: right;
+        font-size: 1.5em;
+      }
+
+      
       span.doc { color: green; font-weight: bold; }
       a { color: black; }
       a:visited { color: gray; }
       .example { float: left; }
       h2 { clear: both; }
 
-      .awesome .graph-header { width: 400px; }
+      .awesome .graph-header { width: 370px; }
       .sales   .graph-header { width: 300px; }
 
-      .sales { margin-left: 50px; }
+      .sales { margin-left: 30px; }
       li { margin-bottom: 3px; }
     </style>
 
@@ -56,26 +66,29 @@
     </script>
   </head>
   <body>
+    <div id="container">
+      <div class="download">
+        <a href="jquery.tufte-graph.js">Download</a>
+      </div>
     <h1>TufteGraph</h1>
-    <p>Make pretty graphs with javascript, using jQuery and the <code>&lt;canvas&gt;</code> element. It is different from other charting libraries because:</p>
+    <p><strong>Make pretty graphs with javascript</strong>, using <a href="http://jquery.com">jQuery</a> and the <code>&lt;canvas&gt;</code> element. It is different from other charting libraries because:</p>
     <ul>
       <li>Configuration is by dynamic functions, allowing for really compact API (very few options)</li>
       <li>Non-core layout is done via CSS rather than code</li>
     </ul>
-    <h2>Examples</h2>
     <div class='example awesome'>
       <div class='graph-header'>
         <h3>Animal awesomeness</h3>
         <p>Measured by standard combo multiplier</p>
       </div>
-      <div id='awesome-graph' class='graph' style='width: 400px; height: 200px;'></div>
+      <div id='awesome-graph' class='graph' style='width: 370px; height: 200px;'></div>
     </div>  
     <div class='example sales'>
       <div class='graph-header'>
         <h3>Sales by region</h3>
         <p>Past 4 years</p>
       </div>
-      <div id='stacked-graph' class='graph' style='width: 300px; height: 200px;'></div>
+      <div id='stacked-graph' class='graph' style='width: 250px; height: 200px;'></div>
     </div>  
     <h2>API</h2>
     
@@ -96,31 +109,40 @@
     <span class="doc">// Any of the following properties can be either static values 
     // or a function that will be called for each data point
 
-    // Bar width in arbitrary units, 1.0 means the bars will be snuggled up next to each other</span>
+    // Bar width in arbitrary units, 1.0 means the bars will be snuggled
+    // up next to each other</span>
     barWidth: 0.8, 
 
-    <span class="doc">// The label on top of the bar - can contain HTML (it goes in a DIV)</span>
+    <span class="doc">// The label on top of the bar - can contain HTML</span>
     barLabel:  function(element, index) { return element[0] + 'x' }, 
 
-    <span class="doc">// The label on the x-axis - can contain HTML (it goes in a DIV)</span>
+    <span class="doc">// The label on the x-axis - can contain HTML</span>
     axisLabel: function(element, index) { return element[1].label }, 
 
     <span class="doc">// The color of the bar</span>
-    color:     function(element, index) { return ['#E57536', '#82293B'][index % 2] },
+    color:     function(element, index) { 
+      return ['#E57536', '#82293B'][index % 2] 
+    },
     <span class="doc">// Stacked graphs also pass a stackedIndex parameter</span>
-    color:     function(element, index, stackedIndex) { return ['#E57536', '#82293B'][stackedIndex % 2] },
-    <span class="doc">// Alternatively, you can just override the default colors and keep the built in color functions</span>
+    color:     function(element, index, stackedIndex) { 
+      return ['#E57536', '#82293B'][stackedIndex % 2] 
+     },
+    <span class="doc">// Alternatively, you can just override the default colors and keep
+    // the built in color functions</span>
     colors: ['#82293B', '#E57536', '#FFBE33'],
  
     <span class="doc">// Legend is optional</span>
     legend: {
-      <span class="doc">// Data can be an array of any type of object, but the default formatter works with strings</span>
+      <span class="doc">// Data can be an array of any type of object, but the default
+      // formatter works with strings</span>
       data: ["North", "East", "West"],
 
       <span class="doc">// By default, the colors of the graph are used</span>
-      color: function(element, index) { return ['#E57536', '#82293B'][index % 2] },
+      color: function(element, index) { 
+        return ['#E57536', '#82293B'][index % 2] 
+      },
 
-      <span class="doc">// You can customize the element label - can contain HTML (it goes in a TD)</span>
+      <span class="doc">// You can customize the element label - can contain HTML</span>
       label: function(element, index) { return element }
     }
   });
@@ -130,7 +152,6 @@
   <h2>Hot Tips</h2>
   <ul>
     <li>You need to be using <code><a href="http://jquery.com">jQuery</a></code>. View source on this page if you don't quite get it.</li>
-    <li>It only does simple bar charts.</li>
     <li>By default your graph won't be that pretty because it needs to be styled. I recommend <code>tufte-graph.css</code> as a good starting point.</li>
     <li>Find beautiful colors for you graphs at <a href="http://www.colourlovers.com/">ColourLovers</a></li>
     <li>I have tested this in Firefox 3 and Safari 3 and nothing else. Buyer beware.</li>
@@ -138,6 +159,7 @@
     <li><a href="mailto:contact@rhnh.net">Email me</a> the cool graphs you make, I really dig graphs.</li>
     <li>If you're going to make changes to this library, please <a href="http://github.com/xaviershay/tufte-graph">fork on github</a> and share the love.</li>
   </ul>  
+  </div>
   <a href="http://github.com/xaviershay/tufte-graph"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub" /></a>
   </body>
 </html>
