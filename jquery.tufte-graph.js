@@ -1,9 +1,10 @@
+// I borrowed liberally from flot - it's good at other types of graphs
 ( function( $ ) {
   function TufteBar( target_, options_ ) {
     var target = target_;
     var options = $.extend(true, {
       barWidth: 0.8,
-      color:      function(element, index) { return '#476fb2'; },
+      color:     function(element, index) { return '#476fb2'; },
       barLabel:  function(element, index) { return element[0]; },
       axisLabel: function(element, index) { return index; }
     }, options_);
@@ -20,13 +21,8 @@ function draw(target, options) {
     element = options.data[i];
 
     var x = i + 0.5,
-        y = element[0],
-        drawLeft = true,
-        drawTop = true,
-        drawRight = true;
+        y = element[0];
 
-    // determine the co-ordinates of the bar, account for negative bars having
-    // flipped top/bottom and draw/don't draw accordingly
     var halfBar = options.barWidth / 2;
     var left   = x - halfBar,
         right  = x + halfBar,
@@ -36,10 +32,10 @@ function draw(target, options) {
     ctx.save();
     ctx.fillStyle = options.color(element, i);
     ctx.beginPath();
-    ctx.moveTo( tX( left ), tY( bottom) );
-    ctx.lineTo( tX( left ), tY( top) );
-    ctx.lineTo( tX( right ), tY( top) );
-    ctx.lineTo( tX( right ), tY( bottom) );
+      ctx.moveTo( tX( left ),  tY( bottom) );
+      ctx.lineTo( tX( left ),  tY( top) );
+      ctx.lineTo( tX( right ), tY( top) );
+      ctx.lineTo( tX( right ), tY( bottom) );
     ctx.fill();
     ctx.restore();
 
@@ -80,34 +76,25 @@ function constructCanvas() {
 }
 
 function calculateRange(options) {
-  var top_sentry    = Number.POSITIVE_INFINITY,
-      bottom_sentry = Number.NEGATIVE_INFINITY;
-
   var axis = {
     x: {},
     y: {}
   }
 
-  axis.x.datamin = axis.y.datamin = 0;
-  axis.y.datamax = axis.y.datamax = bottom_sentry;
+  axis.x.min = 0
+  axis.x.max = options.data.length;
+  axis.y.min = 0;
+  axis.y.max = 0;
 
   for (var i = 0; i < options.data.length; ++i) {
     element = options.data[i];
     var y = element[0]; // TODO: Support non-array y values
-    if( y < axis.y.datamin )      throw("Negative values not supported");
-    if( y > axis.y.datamax )      axis.y.datamax = y;
+    if( y < axis.y.min )      throw("Negative values not supported");
+    if( y > axis.y.max )      axis.y.max = y;
   }
-
-  axis.x.datamax = options.data.length;
   
-  if( axis.x.datamin == top_sentry )           axis.x.datamin = 0;
-  if( axis.y.datamin == top_sentry )           axis.y.datamin = 0;
-  if( axis.x.datamax == bottom_sentry )        axis.x.datamax = 1;
-  if( axis.y.datamax == bottom_sentry )        axis.y.datamax = 1;
-  axis.x.min = axis.x.datamin;
-  axis.x.max = axis.x.datamax;
-  axis.y.min = axis.y.datamin;
-  axis.y.max = axis.y.datamax;
+  if( axis.x.max <= 0) throw("You must have at least one data point");
+  if( axis.y.max <= 0) throw("You must have at least one y-value greater than 0");
 
   return axis;
 }
