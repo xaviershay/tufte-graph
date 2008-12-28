@@ -2,16 +2,8 @@
   $.fn.tufteBar = function(options) {
     // This crazy method ensures a recursive merge without clobbering the defaults hash
     // There must be a better way to do this (clone?)
-    var defaultCopy = $.extend({}, $.fn.tufteBar.defaults, {});
-    var options = $.extend(true, defaultCopy, options);
-
-    // Transform normal bar data into data for a stacked bar, by making
-    // the y-value into an array
-    options.data = $.map(options.data, function(element) {
-      var ret = [[element[0].length ? element[0] : [element[0]], element[1]]];
-      ret[0][0].sum = function () { return sum(ret[0][0]); };
-      return ret;
-    });
+    var defaultCopy = $.extend({},   $.fn.tufteBar.defaults, {});
+    var options =     $.extend(true, defaultCopy,            options);
 
     return this.each(function () {
       draw(makePlot($(this), options), options);
@@ -48,8 +40,19 @@
     // Iterate over each bar
     for (var i = 0; i < options.data.length; ++i) {
       var element = options.data[i];
-      var x = i + 0.5,
-          all_y = element[0];
+      var x = i + 0.5;
+      var all_y = null;
+
+      if (element[0].length) {
+        // This is a stacked bar, so the data is all good to go
+        all_y = element[0];
+
+        // Add the sum function to the data since most custom functions will want to use this
+        element[0].sum = function() { return sum(all_y) };
+      } else {
+        // This is a normal bar, wrap in an array to make it a stacked bar with one data point
+        all_y = [element[0]];
+      }
 
       var lastY = 0;
 
@@ -101,6 +104,9 @@
         $(html).css(pos).appendTo( plot.target );        
       }
 
+      var optionResolver = function(option) { // Curry resolveOption for convenience
+        return resolveOption(option, element, i);
+      }
       addLabel('bar-label', optionResolver(options.barLabel), {
         left:   t.X(x - 0.5),
         bottom: t.H(lastY),
