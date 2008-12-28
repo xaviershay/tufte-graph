@@ -38,8 +38,8 @@
     var axis = plot.axis;
 
     // Iterate over each bar
-    for (var i = 0; i < options.data.length; ++i) {
-      var element = options.data[i];
+    $(options.data).each(function (i) {
+      var element = this;
       var x = i + 0.5;
       var all_y = null;
 
@@ -73,7 +73,7 @@
 
       ctx.save();
       // Iterate over each data point for this bar and render a rectangle for each
-      for (var stackedIndex = 0; stackedIndex < all_y.length; stackedIndex++) {
+      $(all_y).each(function(stackedIndex) {
         var optionResolver = function(option) { // Curry resolveOption for convenience
           return resolveOption(option, element, i, stackedIndex);
         }
@@ -96,7 +96,7 @@
         ctx.strokeRect( coords[0], coords[1], coords[2], coords[3] );
 
         lastY = lastY + y;
-      }
+      });
       ctx.restore();
 
       addLabel = function(klass, text, pos) {
@@ -117,7 +117,7 @@
         top:   t.Y(0),
         width: t.W(1)
       });
-    }
+    });
     addLegend(plot, options);
   }
 
@@ -125,21 +125,20 @@
   // absolutely positioned table placed at the top right of the graph
   function addLegend(plot, options) {
     if (options.legend.data) {
-      var data = options.legend.data;
-
-      elements = [];
-      for (var i = data.length - 1; i >= 0; i--) {
-        var element = data[i];
-        var optionResolver = function(option) { // Curry resolveOption for convenience
-          return resolveOption(option, element, i, null);
-        }
+      elements = $(options.legend.data).collect(function(i) {
+        var optionResolver = (function (element) {
+          return function(option) { // Curry resolveOption for convenience
+            return resolveOption(option, element, i, null);
+          }
+        })(this);  
 
         var colorBox = '<div class="color-box" style="background-color:' + optionResolver(options.legend.color) + '"></div>';
         var label = optionResolver(options.legend.label);
 
-        elements += ["<tr><td>" + colorBox + "</td><td>" + label + "</td></tr>"];
-      }
-      $('<table class="legend">' + elements + '</table>').css({
+        return "<tr><td>" + colorBox + "</td><td>" + label + "</td></tr>";
+      });
+
+      $('<table class="legend">' + elements.join("") + '</table>').css({
         position: 'absolute',
         top:  '0px',
         left: plot.width + 'px'
@@ -172,14 +171,13 @@
     axis.y.min = 0;
     axis.y.max = 0;
 
-    for (var i = 0; i < options.data.length; ++i) {
-      element = options.data[i];
-      var y = element[0]; // TODO: Support non-array y values
+    $(options.data).each(function() {
+      var y = this[0];
       if (y.length)
         y = sum(y);
       if( y < axis.y.min )      throw("Negative values not supported");
       if( y > axis.y.max )      axis.y.max = y;
-    }
+    });
     
     if( axis.x.max <= 0) throw("You must have at least one data point");
     if( axis.y.max <= 0) throw("You must have at least one y-value greater than 0");
