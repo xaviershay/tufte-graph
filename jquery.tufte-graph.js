@@ -13,12 +13,12 @@
   $.fn.tufteBar.defaults = {
     barWidth:  0.8,
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
-    color:     function(element, index, stackedIndex) { return $.fn.tufteBar.defaults.colors[stackedIndex % $.fn.tufteBar.defaults.colors.length]; },
-    barLabel:  function(element, index, stackedIndex) { return $(element[0]).sum(); },
-    axisLabel: function(element, index, stackedIndex) { return index; },
+    color:     function(index, stackedIndex) { return $.fn.tufteBar.defaults.colors[stackedIndex % $.fn.tufteBar.defaults.colors.length]; },
+    barLabel:  function(index, stackedIndex) { return $(this[0]).sum(); },
+    axisLabel: function(index, stackedIndex) { return index; },
     legend: {
-      color: function(e, i) { return $.fn.tufteBar.defaults.colors[i % $.fn.tufteBar.defaults.colors.length]; },
-      label: function(e, i) { return e; }
+      color: function(index) { return $.fn.tufteBar.defaults.colors[index % $.fn.tufteBar.defaults.colors.length]; },
+      label: function(index) { return this; }
     }
   }
 
@@ -30,7 +30,7 @@
   // It allows options to be provided as either static values or functions which are
   // evaluated each time they are used
   function resolveOption(option, element, index, stackedIndex) {
-    return $.isFunction(option) ? option(element, index, stackedIndex) : option;
+    return $.isFunction(option) ? option.call(element, index, stackedIndex) : option;
   }
 
   function draw(plot, options) {
