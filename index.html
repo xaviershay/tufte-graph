@@ -70,7 +70,7 @@
           barLabel:  function(element, index) {
             // This is a simplistic algorithm for demo only
             // Do not use in production code
-            amount = (element[0].sum() * 10000).toFixed(0);
+            amount = ($(element[0]).sum() * 10000).toFixed(0);
             return '$' + amount.slice(0, 2) + ',' + amount.slice(2, 5);
           },
           axisLabel: function(element, index) { return element[1].label },

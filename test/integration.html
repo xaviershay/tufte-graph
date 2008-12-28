@@ -65,7 +65,7 @@
         jQuery('#stacked-dynamic-graph').tufteBar({
           data: stackedTestData,
           barWidth:  function(e, i) { return 0.5 + (i % 2) * 0.2 },
-          barLabel:  function(e, i) { return e[0].sum() },
+          barLabel:  function(e, i) { return $(e[0]).sum() },
           axisLabel: function(e, i) { return e[1].label }, 
           color:     function(e, i, stackedIndex) { 
             return (e[1].colors || ['#82293B', '#E57536', '#FFBE33'])[stackedIndex % 3] 

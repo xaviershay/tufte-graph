@@ -14,7 +14,7 @@
     barWidth:  0.8,
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
     color:     function(element, index, stackedIndex) { return $.fn.tufteBar.defaults.colors[stackedIndex % $.fn.tufteBar.defaults.colors.length]; },
-    barLabel:  function(element, index, stackedIndex) { return sum(element[0]); },
+    barLabel:  function(element, index, stackedIndex) { return $(element[0]).sum(); },
     axisLabel: function(element, index, stackedIndex) { return index; },
     legend: {
       color: function(e, i) { return $.fn.tufteBar.defaults.colors[i % $.fn.tufteBar.defaults.colors.length]; },
@@ -46,9 +46,6 @@
       if (element[0].length) {
         // This is a stacked bar, so the data is all good to go
         all_y = element[0];
-
-        // Add the sum function to the data since most custom functions will want to use this
-        element[0].sum = function() { return sum(all_y) };
       } else {
         // This is a normal bar, wrap in an array to make it a stacked bar with one data point
         all_y = [element[0]];
@@ -146,18 +143,6 @@
     }
   }
 
-  // Convenience method to sum the values contained in an array
-  // This function is attached to the data points arrays provided
-  // for a stacked bar chart, since most label formatters will want
-  // to use it
-  function sum(a) {
-    var total = 0;
-    $.each(a, function() {
-      total += this;
-    });
-    return total;
-  }
-
   // Calculates the range of the graph by looking for the 
   // maximum y-value
   function makeAxis(options) {
@@ -174,7 +159,7 @@
     $(options.data).each(function() {
       var y = this[0];
       if (y.length)
-        y = sum(y);
+        y = $(y).sum();
       if( y < axis.y.min )      throw("Negative values not supported");
       if( y > axis.y.max )      axis.y.max = y;
     });
