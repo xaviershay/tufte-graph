@@ -135,7 +135,7 @@
         return "<tr><td>" + colorBox + "</td><td>" + label + "</td></tr>";
       });
 
-      $('<table class="legend">' + elements.join("") + '</table>').css({
+      $('<table class="legend">' + elements.reverse().join("") + '</table>').css({
         position: 'absolute',
         top:  '0px',
         left: plot.width + 'px'
