@@ -68,7 +68,6 @@
       // Y needs to invert the result since 0 in plot coords is bottom left, but 0 in pixel coords is top left
       t.Y = function(y) { return axis.y.pixelLength - t.H(y) }; 
 
-      ctx.save();
       // Iterate over each data point for this bar and render a rectangle for each
       $(all_y).each(function(stackedIndex) {
         var optionResolver = function(option) { // Curry resolveOption for convenience
@@ -87,14 +86,10 @@
         var color = optionResolver(options.color);
         var coords = [t.X(left), t.Y(top), t.W(width), t.H(height)];
 
-        ctx.fillStyle   = color;
-        ctx.strokeStyle = color;
-        ctx.fillRect(   coords[0], coords[1], coords[2], coords[3] );
-        ctx.strokeRect( coords[0], coords[1], coords[2], coords[3] );
+        ctx.rect(coords[0], coords[1], coords[2], coords[3]).attr({stroke: color, fill: color});
 
         lastY = lastY + y;
       });
-      ctx.restore();
 
       addLabel = function(klass, text, pos) {
         html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
@@ -183,9 +178,7 @@
     }
 
     // the canvas
-    canvas = $('<canvas width="' + plot.width + '" height="' + plot.height + '"></canvas>').appendTo( target ).get( 0 );
-    if( $.browser.msie ) { canvas = window.G_vmlCanvasManager.initElement( canvas ); }
-    plot.ctx = canvas.getContext( '2d' );
+    plot.ctx = Raphael(target[0].id, plot.width, plot.height);
 
     plot.axis = makeAxis(options);
     plot.axis.x.pixelLength = plot.width;
