@@ -48,12 +48,16 @@
       var x = i + 0.5;
       var all_y = null;
 
-      if (element[0].length) {
+      if (element[0] instanceof Array) {
         // This is a stacked bar, so the data is all good to go
         all_y = element[0];
       } else {
         // This is a normal bar, wrap in an array to make it a stacked bar with one data point
         all_y = [element[0]];
+      }
+
+      if ($(all_y).any(function() { return isNaN(+this); })) {
+        throw("Non-numeric value provided for y: " + element[0]);
       }
 
       var lastY = 0;

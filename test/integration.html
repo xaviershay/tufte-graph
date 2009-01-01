@@ -14,6 +14,7 @@
       .test-case { float: left; text-align: center; margin-right: 50px;}
       a, a:visited { color: black; }
       h2 { font-size: 1.2em; clear: both;}
+      table { text-align: left; margin-bottom: 10px;}
     </style>
 
     <script type="text/javascript">
@@ -98,6 +99,33 @@
             data: ["A", "B", "C"]
           }
         });
+        
+        var pass;
+        pass = false;
+        try {
+          $('#error-graph').tufteBar({
+            data: [
+              [1.0],
+              ["Bogus"]
+            ]
+          });
+        } catch(e) {
+          pass = (e == "Non-numeric value provided for y: Bogus");
+        }
+        $('#result-bar').text(pass ? 'Pass' : 'Fail');
+
+        pass = false;
+        try {
+          $('#error-graph').tufteBar({
+            data: [
+              [1.0],
+              [[0, "Bogus"]]
+            ]
+          });
+        } catch(e) {
+          pass = (e == "Non-numeric value provided for y: 0,Bogus");
+        }
+        $('#result-stacked').text(pass ? 'Pass' : 'Fail');
 
         (function(table) {
           table.before("<div id='data-table-1-graph' class='graph' style='width:200px; height: 150px'></div>")
@@ -149,6 +177,18 @@
     <div class='test-case'>
       <h3>Use graph colors</h3>
       <div id='legend-colors-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
+    <h2>Error Handling</h2>
+    <div class='test-case'>
+      <div id='error-graph' style='width:200px; height: 150px; display: none;'></div>
+      <table>
+        <tr>
+          <th>Test</th>
+          <th>Result</th>
+        </tr>
+        <tr><td>Non-numeric y-value for bar graph</td><td id='result-bar'>Not run</td></tr>
+        <tr><td>Non-numeric y-value for stacked graph</td><td id='result-stacked'>Not run</td></tr>
+      </table>  
     </div>
     <h2>Using data from table</h2>
     <div class='test-case'>
