@@ -1,9 +1,7 @@
 (function($) {
   $.fn.tufteBar = function(options) {
-    // This crazy method ensures a recursive merge without clobbering the defaults hash
-    // There must be a better way to do this (clone?)
-    var defaultCopy = $.extend({},   $.fn.tufteBar.defaults, {});
-    var options =     $.extend(true, defaultCopy,            options);
+    var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
+    var options =     $.extend(true, defaultCopy, options);
 
     return this.each(function () {
       draw(makePlot($(this), options), options);
@@ -13,11 +11,11 @@
   $.fn.tufteBar.defaults = {
     barWidth:  0.8,
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
-    color:     function(index, stackedIndex) { return $.fn.tufteBar.defaults.colors[stackedIndex % $.fn.tufteBar.defaults.colors.length]; },
+    color:     function(index, stackedIndex, options) { return options.colors[stackedIndex % options.colors.length]; },
     barLabel:  function(index, stackedIndex) { return $(this[0]).sum(); },
     axisLabel: function(index, stackedIndex) { return index; },
     legend: {
-      color: function(index) { return $.fn.tufteBar.defaults.colors[index % $.fn.tufteBar.defaults.colors.length]; },
+      color: function(index, options) { return options.colors[index % options.colors.length]; },
       label: function(index) { return this; }
     }
   }
@@ -26,11 +24,18 @@
   // Private functions
   //
 
+  function toArray() {
+    var result = []
+    for (var i = 0; i < this.length; i++)
+      result.push(this[i])
+    return(result)
+  }
+
   // This function should be applied to any option used from the options hash.
   // It allows options to be provided as either static values or functions which are
   // evaluated each time they are used
-  function resolveOption(option, element, index, stackedIndex) {
-    return $.isFunction(option) ? option.call(element, index, stackedIndex) : option;
+  function resolveOption(option, element) {
+    return $.isFunction(option) ? option.apply(element, toArray.apply(arguments).slice(2, arguments.length)) : option;
   }
 
   function draw(plot, options) {
@@ -71,7 +76,7 @@
       // Iterate over each data point for this bar and render a rectangle for each
       $(all_y).each(function(stackedIndex) {
         var optionResolver = function(option) { // Curry resolveOption for convenience
-          return resolveOption(option, element, i, stackedIndex);
+          return resolveOption(option, element, i, stackedIndex, options);
         }
 
         var y = all_y[stackedIndex];
@@ -97,7 +102,7 @@
       }
 
       var optionResolver = function(option) { // Curry resolveOption for convenience
-        return resolveOption(option, element, i);
+        return resolveOption(option, element, i, options);
       }
       addLabel('bar-label', optionResolver(options.barLabel), {
         left:   t.X(x - 0.5),
@@ -120,7 +125,7 @@
       elements = $(options.legend.data).collect(function(i) {
         var optionResolver = (function (element) {
           return function(option) { // Curry resolveOption for convenience
-            return resolveOption(option, element, i, null);
+            return resolveOption(option, element, i, options);
           }
         })(this);  
 
