@@ -106,7 +106,8 @@
             data: table.find('tr:gt(0)').collect(function() { 
               column = function(e, n) { return $(e).find('td:nth-child(' + n + ')').text(); };
               return [column(this, 2) * 1, {label: column(this, 1)}]
-            })
+            }),
+            axisLabel: function() { return this[1].label }
           });
         })($('#data-table-1'));
       });
