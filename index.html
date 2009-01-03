@@ -69,10 +69,8 @@
             [[1.5, 2.6, 0.45], {label: '2008'}]
           ],
           barLabel:  function(index) {
-            // This is a simplistic algorithm for demo only
-            // Do not use in production code
             amount = ($(this[0]).sum() * 10000).toFixed(0);
-            return '$' + amount.slice(0, 2) + ',' + amount.slice(2, 5);
+            return '$' + $.tufteBar.formatNumber(amount);
           },
           axisLabel: function(index) { return this[1].label },
           legend: {
@@ -137,8 +135,11 @@
     // up next to each other</span>
     barWidth: 0.8, 
 
-    <span class="doc">// The label on top of the bar - can contain HTML</span>
-    barLabel:  function(index) { return this[0] + 'x' }, 
+    <span class="doc">// The label on top of the bar - can contain HTML
+    // formatNumber inserts commas as thousands separators in a number</span>
+    barLabel:  function(index) { 
+      return $.tufteBar.formatNumber(this[0]) + 'x' 
+    }, 
 
     <span class="doc">// The label on the x-axis - can contain HTML</span>
     axisLabel: function(index) { return this[1].label }, 
