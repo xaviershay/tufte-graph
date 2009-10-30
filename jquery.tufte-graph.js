@@ -12,7 +12,13 @@
     barWidth:  0.8,
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
     color:     function(index, stackedIndex, options) { return options.colors[stackedIndex % options.colors.length]; },
-    barLabel:  function(index, stackedIndex) { return $.tufteBar.formatNumber($(this[0]).sum()); },
+    barLabel:  function(index, stackedIndex) { 
+      // Work around a bug in jquery.enumerable
+      if (this[0] == 0)
+        return $.tufteBar.formatNumber(this[0]);
+      else
+        return $.tufteBar.formatNumber($(this[0]).sum()); 
+    },
     axisLabel: function(index, stackedIndex) { return index; },
     legend: {
       color: function(index, options) { return options.colors[index % options.colors.length]; },
