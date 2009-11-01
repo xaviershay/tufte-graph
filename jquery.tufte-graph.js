@@ -1,4 +1,9 @@
 (function($) {
+  //
+  // Public interface
+  //
+
+  // The main event - creates a pretty graph. See index.html for documentation.
   $.fn.tufteBar = function(options) {
     var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
     var options =     $.extend(true, defaultCopy, options);
@@ -8,16 +13,14 @@
     });
   }
 
+  // Defaults are exposed publically so you can reuse bits that you find 
+  // handy (the colors, for instance)
   $.fn.tufteBar.defaults = {
     barWidth:  0.8,
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
     color:     function(index, stackedIndex, options) { return options.colors[stackedIndex % options.colors.length]; },
     barLabel:  function(index, stackedIndex) { 
-      // Work around a bug in jquery.enumerable
-      if (this[0] == 0)
-        return $.tufteBar.formatNumber(this[0]);
-      else
-        return $.tufteBar.formatNumber($(this[0]).sum()); 
+      return $.tufteBar.formatNumber(totalValue(this[0])); 
     },
     axisLabel: function(index, stackedIndex) { return index; },
     legend: {
@@ -27,6 +30,8 @@
   }
 
   $.tufteBar = {
+    // Add thousands separators to a number to make it look pretty.
+    // 1000 -> 1,000
     formatNumber: function(nStr) {
       // http://www.mredkj.com/javascript/nfbasic.html
       nStr += '';
@@ -45,18 +50,29 @@
   // Private functions
   //
 
-  function toArray() {
-    var result = []
-    for (var i = 0; i < this.length; i++)
-      result.push(this[i])
-    return(result)
-  }
-
   // This function should be applied to any option used from the options hash.
   // It allows options to be provided as either static values or functions which are
   // evaluated each time they are used
   function resolveOption(option, element) {
+    // the @arguments@ special variable looks like an array, but really isn't, so we 
+    // need to transform it in order to perform array function on it
+    function toArray() {
+      var result = []
+      for (var i = 0; i < this.length; i++)
+        result.push(this[i])
+      return(result)
+    }
+
     return $.isFunction(option) ? option.apply(element, toArray.apply(arguments).slice(2, arguments.length)) : option;
+  }
+
+  // Returns the total value of a bar, for labeling or plotting. Y values can either be 
+  // a single number (for a normal graph), or an array of numbers (for a stacked graph)
+  function totalValue(value) {
+    if (value instanceof Array) 
+      return $.sum(value);
+    else
+      return value;
   }
 
   function draw(plot, options) {
@@ -182,11 +198,9 @@
     axis.y.max = 0;
 
     $(options.data).each(function() {
-      var y = this[0];
-      if (y.length)
-        y = $(y).sum();
-      if( y < axis.y.min )      throw("Negative values not supported");
-      if( y > axis.y.max )      axis.y.max = y;
+      var y = totalValue(this[0]);
+      if( y < axis.y.min ) throw("Negative values not supported");
+      if( y > axis.y.max ) axis.y.max = y;
     });
     
     if( axis.x.max <= 0) throw("You must have at least one data point");
