@@ -104,7 +104,7 @@
 
     <p class='differences'>It is different from other javascript charting libraries because:</p>
     <ul>
-      <li>Configuration is by dynamic functions, allowing for really compact API (very few options)</li>
+      <li>Configuration is by dynamic functions, allowing for a really compact API (very few options)</li>
       <li>Non-core layout is done via CSS rather than code</li>
     </ul>
 
@@ -148,10 +148,12 @@
     color:     function(index) { 
       return ['#E57536', '#82293B'][index % 2] 
     },
+
     <span class="doc">// Stacked graphs also pass a stackedIndex parameter</span>
     color:     function(index, stackedIndex) { 
       return ['#E57536', '#82293B'][stackedIndex % 2] 
-     },
+    },
+
     <span class="doc">// Alternatively, you can just override the default colors and keep
     // the built in color functions</span>
     colors: ['#82293B', '#E57536', '#FFBE33'],
