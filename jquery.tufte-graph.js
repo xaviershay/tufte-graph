@@ -3,13 +3,25 @@
   // Public interface
   //
 
+  var line = {}
+  var bar = {}
+
   // The main event - creates a pretty graph. See index.html for documentation.
   $.fn.tufteBar = function(options) {
     var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
     var options =     $.extend(true, defaultCopy, options);
 
     return this.each(function () {
-      draw(makePlot($(this), options), options);
+      bar.draw(makePlot(bar, $(this), options), options);
+    });
+  }
+
+  $.fn.tufteLine = function(options) {
+    var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
+    var options =     $.extend(true, defaultCopy, options);
+
+    return this.each(function () {
+      line.draw(makePlot(line, $(this), options), options);
     });
   }
 
@@ -26,6 +38,11 @@
     legend: {
       color: function(index, options) { return options.colors[index % options.colors.length]; },
       label: function(index) { return this; }
+    },
+    afterDraw: {
+      point: function() {},
+      stack: function() {},
+      graph: function() {}
     }
   }
 
@@ -75,11 +92,28 @@
       return value;
   }
 
-  function draw(plot, options) {
+  var drawFunc = function(plot, options, methods) {
     var ctx = plot.ctx;
     var axis = plot.axis;
 
-    // Iterate over each bar
+    pixel_scaling_function = function(axis) {
+      var scale = axis.pixelLength / (axis.max - axis.min);
+      return function (value) {
+        return (value - axis.min) * scale;
+      }
+    }
+
+    // These functions transform a value from plot coordinates to pixel coordinates
+    var t = {}
+    t.W = pixel_scaling_function(axis.x);
+    t.H = pixel_scaling_function(axis.y);
+    t.X = t.W;
+    // Y needs to invert the result since 0 in plot coords is bottom left, but 0 in pixel coords is top left
+    t.Y = function(y) { return axis.y.pixelLength - t.H(y) };
+    ctx.scale = t;
+    ctx.axis = axis;
+
+    // Iterate over each data point
     $(options.data).each(function (i) {
       var element = this;
       var x = i + 0.5;
@@ -93,34 +127,31 @@
         all_y = [element[0]];
       }
 
-      if ($(all_y).any(function() { return isNaN(+this); })) {
-        throw("Non-numeric value provided for y: " + element[0]);
-      }
-
       var lastY = 0;
 
-      pixel_scaling_function = function(axis) {
-        var scale = axis.pixelLength / (axis.max - axis.min);
-        return function (value) {
-          return (value - axis.min) * scale;
-        }
-      }
-
-      // These functions transform a value from plot coordinates to pixel coordinates
-      var t = {}
-      t.W = pixel_scaling_function(axis.x);
-      t.H = pixel_scaling_function(axis.y);
-      t.X = t.W;
-      // Y needs to invert the result since 0 in plot coords is bottom left, but 0 in pixel coords is top left
-      t.Y = function(y) { return axis.y.pixelLength - t.H(y) };
-
-      // Iterate over each data point for this bar and render a rectangle for each
-      $(all_y).each(function(stackedIndex) {
+      // Iterate over each data point for this line and render paths
+      $(all_y).each(function(index) {
         var optionResolver = function(option) { // Curry resolveOption for convenience
-          return resolveOption(option, element, i, stackedIndex, options);
+          return resolveOption(option, element, i, index, options);
         }
 
-        var y = all_y[stackedIndex];
+        methods.drawPoint(ctx, options, optionResolver, index, x, this);
+
+        options.afterDraw.point(i, index, ctx);
+      });
+
+      methods.drawStack(ctx, options, i, all_y, this, x);
+      options.afterDraw.stack(i, ctx);
+    });
+    methods.drawGraph(plot, options);
+    options.afterDraw.graph(ctx);
+  }
+
+  bar.draw = function(plot, options) {
+    var lastY = 0;
+
+    drawFunc(plot, options, {
+      drawPoint: function(ctx, options, optionResolver, stackedIndex, x, y) {
         var halfBar = optionResolver(options.barWidth) / 2;
         var left   = x - halfBar,
             width  = halfBar * 2,
@@ -130,34 +161,68 @@
         // Need to both fill and stroke the rect to make sure the whole area is covered
         // You get nasty artifacts otherwise
         var color = optionResolver(options.color);
+        var t = ctx.scale;
         var coords = [t.X(left), t.Y(top), t.W(width), t.H(height)];
 
         ctx.rect(coords[0], coords[1], coords[2], coords[3]).attr({stroke: color, fill: color});
 
         lastY = lastY + y;
-      });
+      },
+      drawStack: function(ctx, options, i, stackedY, element, x) {
+        addLabel = function(klass, text, pos) {
+          html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
+          $(html).css(pos).appendTo( plot.target );
+        }
 
-      addLabel = function(klass, text, pos) {
-        html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
-        $(html).css(pos).appendTo( plot.target );
-      }
+        var optionResolver = function(option) { // Curry resolveOption for convenience
+          return resolveOption(option, element, i, options);
+        }
+        var t = ctx.scale;
 
-      var optionResolver = function(option) { // Curry resolveOption for convenience
-        return resolveOption(option, element, i, options);
+        addLabel('bar-label', optionResolver(options.barLabel), {
+          left:   t.X(x - 0.5),
+          bottom: t.H(lastY),
+          width:  t.W(1)
+        });
+        addLabel('axis-label', optionResolver(options.axisLabel), {
+          left:  t.X(x - 0.5),
+          top:   t.Y(0),
+          width: t.W(1)
+        });
+        lastY = 0;
+
+      },
+      drawGraph: function(plot, options) {
+        addLegend(plot, options);
       }
-      addLabel('bar-label', optionResolver(options.barLabel), {
-        left:   t.X(x - 0.5),
-        bottom: t.H(lastY),
-        width:  t.W(1)
-      });
-      addLabel('axis-label', optionResolver(options.axisLabel), {
-        left:  t.X(x - 0.5),
-        top:   t.Y(0),
-        width: t.W(1)
-      });
     });
-    addLegend(plot, options);
   }
+
+  line.draw = function(plot, options) {
+    var paths = [];
+
+    drawFunc(plot, options, {
+      drawPoint: function(ctx, options, optionResolver, index, x, y) {
+        var coords = [ctx.scale.X(x), ctx.scale.Y(y)];
+
+        if (!paths[index])
+          paths[index] = ctx.path().moveTo(0, coords[1]).attr({stroke: optionResolver(options.color), "stroke-width": 4, "stroke-linejoin": "round"});
+
+        var path = paths[index];
+
+        path.lineTo(coords[0], coords[1]);
+      },
+      drawStack: function(ctx, options, i, stackedY) {
+        if (i == options.data.length - 1) {
+          $(stackedY).each(function(index) {
+            paths[index].lineTo(ctx.axis.x.pixelLength, ctx.scale.Y(this));
+          });
+        }
+      },
+      drawGraph: function() {}
+    });
+  }
+
 
   // If legend data has been provided, transform it into an
   // absolutely positioned table placed at the top right of the graph
@@ -186,7 +251,7 @@
 
   // Calculates the range of the graph by looking for the
   // maximum y-value
-  function makeAxis(options) {
+  bar.makeAxis = function(options) {
     var axis = {
       x: {},
       y: {}
@@ -209,8 +274,36 @@
     return axis;
   }
 
+  line.makeAxis = function(options) {
+    var axis = {
+      x: {},
+      y: {}
+    }
+
+    axis.x.min = 0
+    axis.x.max = options.data.length;
+    axis.y.min = 99999999999;
+    axis.y.max = 0;
+
+    $(options.data).each(function() {
+      var min_y = Math.min(this[0][0], this[0][1]); //totalValue(this[0]);
+      if( min_y < axis.y.min ) axis.y.min = min_y;
+
+      var max_y = Math.max(this[0][0], this[0][1]); //totalValue(this[0]);
+      if( max_y > axis.y.max ) axis.y.max = max_y;
+    });
+
+    if( axis.x.max <= 0) throw("You must have at least one data point");
+
+    var range = axis.y.max - axis.y.min;
+    axis.y.min = axis.y.min - range * 0.4;
+    axis.y.max = axis.y.max + range * 0.4;
+
+    return axis;
+  }
+
   // Creates the canvas object to draw on, and set up the axes
-  function makePlot(target, options) {
+  function makePlot(graph, target, options) {
     var plot = {};
     plot.target = target;
     plot.width = target.width();
@@ -224,7 +317,7 @@
     // the canvas
     plot.ctx = Raphael(target[0].id, plot.width, plot.height);
 
-    plot.axis = makeAxis(options);
+    plot.axis = graph.makeAxis(options);
     plot.axis.x.pixelLength = plot.width;
     plot.axis.y.pixelLength = plot.height;
 
