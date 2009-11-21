@@ -27,7 +27,7 @@
         margin-top: 30px;
       }
 
-      
+
       .intro { font-size: 1.4em; }
       .differences { clear: both; }
 
@@ -93,14 +93,14 @@
         <p>Measured by standard combo multiplier</p>
       </div>
       <div id='awesome-graph' class='graph' style='width: 370px; height: 200px;'></div>
-    </div>  
+    </div>
     <div class='example sales'>
       <div class='graph-header'>
         <h3>Sales by region</h3>
         <p>Total revenue per year</p>
       </div>
       <div id='stacked-graph' class='graph' style='width: 270px; height: 200px;'></div>
-    </div>  
+    </div>
 
     <p class='differences'>It is different from other javascript charting libraries because:</p>
     <ul>
@@ -111,7 +111,7 @@
     <h2>Introduction</h2>
     <object width="400" height="300"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id=2655244&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=&amp;fullscreen=1" /><embed src="http://vimeo.com/moogaloop.swf?clip_id=2655244&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="400" height="300"></embed></object><br />(<a href="http://vimeo.com/2655244">Introduction to TufteGraph</a> - if your eyes aren't that good, here's a <a href="http://vimeo.com/download/video:86941519?e=1230521577&h=294ad6507b3e20c0bf7580fae7fa1d3e&uh=e356ab5ee762da2d68e3e494b2631364">high-res version</a>)
     <h2>API</h2>
-    
+
 <pre><code>jQuery(document).ready(function () {
   jQuery('#awesome-graph').tufteBar({
     data: [
@@ -126,38 +126,38 @@
       [[1.5, 1.0, 0.51], {label: '2005'}]
     ],
 
-    <span class="doc">// Any of the following properties can be either static values 
-    // or a function that will be called for each data point. 
-    // For functions, 'this' will be set to the current data element, 
+    <span class="doc">// Any of the following properties can be either static values
+    // or a function that will be called for each data point.
+    // For functions, 'this' will be set to the current data element,
     // just like jQuery's $.each
 
     // Bar width in arbitrary units, 1.0 means the bars will be snuggled
     // up next to each other</span>
-    barWidth: 0.8, 
+    barWidth: 0.8,
 
     <span class="doc">// The label on top of the bar - can contain HTML
     // formatNumber inserts commas as thousands separators in a number</span>
-    barLabel:  function(index) { 
-      return $.tufteBar.formatNumber(this[0]) + 'x' 
-    }, 
+    barLabel:  function(index) {
+      return $.tufteBar.formatNumber(this[0]) + 'x'
+    },
 
     <span class="doc">// The label on the x-axis - can contain HTML</span>
-    axisLabel: function(index) { return this[1].label }, 
+    axisLabel: function(index) { return this[1].label },
 
     <span class="doc">// The color of the bar</span>
-    color:     function(index) { 
-      return ['#E57536', '#82293B'][index % 2] 
+    color:     function(index) {
+      return ['#E57536', '#82293B'][index % 2]
     },
 
     <span class="doc">// Stacked graphs also pass a stackedIndex parameter</span>
-    color:     function(index, stackedIndex) { 
-      return ['#E57536', '#82293B'][stackedIndex % 2] 
+    color:     function(index, stackedIndex) {
+      return ['#E57536', '#82293B'][stackedIndex % 2]
     },
 
     <span class="doc">// Alternatively, you can just override the default colors and keep
     // the built in color functions</span>
     colors: ['#82293B', '#E57536', '#FFBE33'],
- 
+
     <span class="doc">// Legend is optional</span>
     legend: {
       <span class="doc">// Data can be an array of any type of object, but the default
@@ -165,8 +165,8 @@
       data: ["North", "East", "West"],
 
       <span class="doc">// By default, the colors of the graph are used</span>
-      color: function(index) { 
-        return ['#E57536', '#82293B'][index % 2] 
+      color: function(index) {
+        return ['#E57536', '#82293B'][index % 2]
       },
 
       <span class="doc">// You can customize the element label - can contain HTML</span>
@@ -185,7 +185,7 @@
     <li>Read Tufte's <a href="http://books.google.com.au/books?id=JNoBAAAACAAJ">The Visual Display of Quantitative Information</a>, it'll blow your mind. Your graphs will never be the same again.</li>
     <li><a href="mailto:contact@rhnh.net">Email me</a> the cool graphs you make, I really dig graphs.</li>
     <li>If you're going to make changes to this library, please <a href="http://github.com/xaviershay/tufte-graph">fork on github</a> and share the love.</li>
-  </ul>  
+  </ul>
   <div class="footer">
     <p>TufteGraph by <a href="http://rhnh.net">Xavier Shay</a> - MIT License</p>
   </div>

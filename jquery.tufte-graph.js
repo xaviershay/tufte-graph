@@ -13,14 +13,14 @@
     });
   }
 
-  // Defaults are exposed publically so you can reuse bits that you find 
+  // Defaults are exposed publically so you can reuse bits that you find
   // handy (the colors, for instance)
   $.fn.tufteBar.defaults = {
     barWidth:  0.8,
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
     color:     function(index, stackedIndex, options) { return options.colors[stackedIndex % options.colors.length]; },
-    barLabel:  function(index, stackedIndex) { 
-      return $.tufteBar.formatNumber(totalValue(this[0])); 
+    barLabel:  function(index, stackedIndex) {
+      return $.tufteBar.formatNumber(totalValue(this[0]));
     },
     axisLabel: function(index, stackedIndex) { return index; },
     legend: {
@@ -54,7 +54,7 @@
   // It allows options to be provided as either static values or functions which are
   // evaluated each time they are used
   function resolveOption(option, element) {
-    // the @arguments@ special variable looks like an array, but really isn't, so we 
+    // the @arguments@ special variable looks like an array, but really isn't, so we
     // need to transform it in order to perform array function on it
     function toArray() {
       var result = []
@@ -66,10 +66,10 @@
     return $.isFunction(option) ? option.apply(element, toArray.apply(arguments).slice(2, arguments.length)) : option;
   }
 
-  // Returns the total value of a bar, for labeling or plotting. Y values can either be 
+  // Returns the total value of a bar, for labeling or plotting. Y values can either be
   // a single number (for a normal graph), or an array of numbers (for a stacked graph)
   function totalValue(value) {
-    if (value instanceof Array) 
+    if (value instanceof Array)
       return $.sum(value);
     else
       return value;
@@ -112,7 +112,7 @@
       t.H = pixel_scaling_function(axis.y);
       t.X = t.W;
       // Y needs to invert the result since 0 in plot coords is bottom left, but 0 in pixel coords is top left
-      t.Y = function(y) { return axis.y.pixelLength - t.H(y) }; 
+      t.Y = function(y) { return axis.y.pixelLength - t.H(y) };
 
       // Iterate over each data point for this bar and render a rectangle for each
       $(all_y).each(function(stackedIndex) {
@@ -139,7 +139,7 @@
 
       addLabel = function(klass, text, pos) {
         html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
-        $(html).css(pos).appendTo( plot.target );        
+        $(html).css(pos).appendTo( plot.target );
       }
 
       var optionResolver = function(option) { // Curry resolveOption for convenience
@@ -159,7 +159,7 @@
     addLegend(plot, options);
   }
 
-  // If legend data has been provided, transform it into an 
+  // If legend data has been provided, transform it into an
   // absolutely positioned table placed at the top right of the graph
   function addLegend(plot, options) {
     if (options.legend.data) {
@@ -168,7 +168,7 @@
           return function(option) { // Curry resolveOption for convenience
             return resolveOption(option, element, i, options);
           }
-        })(this);  
+        })(this);
 
         var colorBox = '<div class="color-box" style="background-color:' + optionResolver(options.legend.color) + '"></div>';
         var label = optionResolver(options.legend.label);
@@ -184,7 +184,7 @@
     }
   }
 
-  // Calculates the range of the graph by looking for the 
+  // Calculates the range of the graph by looking for the
   // maximum y-value
   function makeAxis(options) {
     var axis = {
@@ -202,7 +202,7 @@
       if( y < axis.y.min ) throw("Negative values not supported");
       if( y > axis.y.max ) axis.y.max = y;
     });
-    
+
     if( axis.x.max <= 0) throw("You must have at least one data point");
     if( axis.y.max <= 0) throw("You must have at least one y-value greater than 0");
 

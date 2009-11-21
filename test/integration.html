@@ -38,14 +38,14 @@
         ]
 
         $('#defaults-graph').tufteBar({
-          data: commonTestData 
+          data: commonTestData
         });
 
         $('#static-properties-graph').tufteBar({
           data: commonTestData,
           barWidth: 0.8,
           barLabel:  'Y',
-          axisLabel: 'X', 
+          axisLabel: 'X',
           color:     '#aa0000'
         });
 
@@ -53,9 +53,9 @@
           data: commonTestData,
           barWidth:  function(i) { return 0.5 + (i % 2) * 0.2 },
           barLabel:  function(i) { return this[0] },
-          axisLabel: function(i) { return this[1].label }, 
-          color:     function(i) { 
-            return this[1].color || ['#E57536', '#82293B'][i % 2] 
+          axisLabel: function(i) { return this[1].label },
+          color:     function(i) {
+            return this[1].color || ['#E57536', '#82293B'][i % 2]
           }
         });
 
@@ -71,9 +71,9 @@
           data: stackedTestData,
           barWidth:  function(i) { return 0.5 + (i % 2) * 0.2 },
           barLabel:  function(i) { return $(this[0]).sum() },
-          axisLabel: function(i) { return this[1].label }, 
-          color:     function(i, stackedIndex) { 
-            return (this[1].colors || ['#82293B', '#E57536', '#FFBE33'])[stackedIndex % 3] 
+          axisLabel: function(i) { return this[1].label },
+          color:     function(i, stackedIndex) {
+            return (this[1].colors || ['#82293B', '#E57536', '#FFBE33'])[stackedIndex % 3]
           }
         });
 
@@ -89,12 +89,12 @@
           legend: {
             data: ["A", "B", "C"],
             label: function(i) { return this + i },
-            color: function(i) { 
-              return ['#82293B', '#E57536', '#FFBE33'][i % 3] 
+            color: function(i) {
+              return ['#82293B', '#E57536', '#FFBE33'][i % 3]
             }
           }
         });
-        
+
         $('#legend-colors-graph').tufteBar({
           data: stackedTestData,
           colors: ['#82293B', '#E57536', '#FFBE33'],
@@ -102,7 +102,7 @@
             data: ["A", "B", "C"]
           }
         });
-        
+
         var pass;
         pass = false;
         try {
@@ -153,7 +153,7 @@
           table.before("<div id='data-table-1-graph' class='graph' style='width:200px; height: 150px'></div>")
 
           $('#data-table-1-graph').tufteBar({
-            data: table.find('tr:gt(0)').collect(function() { 
+            data: table.find('tr:gt(0)').collect(function() {
               column = function(e, n) { return $(e).find('td:nth-child(' + n + ')').text(); };
               return [column(this, 2) * 1, {label: column(this, 1)}]
             }),
@@ -210,7 +210,7 @@
         </tr>
         <tr><td>Non-numeric y-value for bar graph</td><td id='result-bar'>Not run</td></tr>
         <tr><td>Non-numeric y-value for stacked graph</td><td id='result-stacked'>Not run</td></tr>
-      </table>  
+      </table>
     </div>
     <h2>formatNumber</h2>
     <div class='test-case'>
@@ -221,7 +221,7 @@
           <th>Actual</th>
           <th>Status</th>
         </tr>
-      </table>  
+      </table>
     </div>
     <h2>Using data from table</h2>
     <div class='test-case'>
@@ -236,7 +236,7 @@
         <tr><td>D</td><td>4.0</td></tr>
         <tr><td>E</td><td>5.2</td></tr>
         <tr><td>F</td><td>7.0</td></tr>
-      </table>  
+      </table>
     </div>
   </body>
-</html>  
+</html>

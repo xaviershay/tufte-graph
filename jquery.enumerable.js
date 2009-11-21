@@ -58,7 +58,7 @@
 
   var staticFunctions = {};
   var iteratorFunctions = {};
-  $.each( methods, function(name, f){ 
+  $.each( methods, function(name, f){
     staticFunctions[name]   = makeStaticFunction(f);
     iteratorFunctions[name] = makeIteratorFunction(staticFunctions[name]);
   });
@@ -95,7 +95,7 @@
   }
 
   function negate(f) {
-    return function() { 
+    return function() {
       return !f.apply(this, arguments)
     }
   }
