@@ -73,7 +73,7 @@
           bar: {
             barLabel:  function(index) {
               amount = ($(this[0]).sum() * 10000).toFixed(0);
-              return '$' + $.tufteBar.formatNumber(amount);
+              return '$' + $.tufteGraph.formatNumber(amount);
             },
             axisLabel: function(index) { return this[1].label }
           },
@@ -144,7 +144,7 @@
       <span class="doc">// The label on top of the bar - can contain HTML
       // formatNumber inserts commas as thousands separators in a number</span>
       barLabel:  function(index) {
-        return $.tufteBar.formatNumber(this[0]) + 'x'
+        return $.tufteGraph.formatNumber(this[0]) + 'x'
       },
 
       <span class="doc">// The label on the x-axis - can contain HTML</span>

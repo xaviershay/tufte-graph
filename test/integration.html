@@ -34,7 +34,7 @@
         stackedTestData = [
           [[2.0, 1.0, 0.6], {label: 'A'}],
           [[2.4, 0.9, 2.0], {label: 'B'}],
-          [[1.5, 2.6, 0.4], {label: 'C', colors: $.fn.tufteBar.defaults.colors}],
+          [[1.5, 2.6, 0.4], {label: 'C', colors: $.fn.tufteGraph.defaults.colors}],
           [[0.0, 0.0, 0.0], {label: 'D'}],
         ]
 
@@ -125,7 +125,7 @@
               var x = ctx.scale.X(index + 0.5);
               var y = ctx.scale.Y(stackedTestData[index][0][stackedIndex]);
               ctx.circle(x, y, 4).attr({
-                fill:   $.fn.tufteBar.defaults.color(index, stackedIndex, $.fn.tufteBar.defaults),
+                fill:   $.fn.tufteGraph.defaults.color(index, stackedIndex, $.fn.tufteGraph.defaults),
                 stroke: '#FFFFFF'
               });
             },
@@ -181,9 +181,9 @@
         ]).each(function (index) {
           input = this[0];
           expected = this[1];
-          actual = $.tufteBar.formatNumber(input);
+          actual = $.tufteGraph.formatNumber(input);
 
-          if ($.tufteBar.formatNumber(this[0]) == this[1])
+          if ($.tufteGraph.formatNumber(this[0]) == this[1])
             pass = true;
           else
             pass = false;

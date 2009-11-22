@@ -19,7 +19,7 @@
   // Creates a pretty bar graph. See index.html for documentation.
   $.fn.tufteBar = function(options) {
     console.log("DEPRECATED - please use tufteGraph('bar', options) instead")
-    this.tufteGraph('bar', options);
+    return this.tufteGraph('bar', options);
   }
 
   // Defaults are exposed publically so you can reuse bits that you find
@@ -40,15 +40,16 @@
     bar: {
       barWidth:  0.8,
       barLabel:  function(index, stackedIndex) {
-        return $.tufteBar.formatNumber($.sum(toArray(this[0])));
+        return $.tufteGraph.formatNumber($.sum(toArray(this[0])));
       },
       axisLabel: function(index, stackedIndex) { return index; }
     }
   }
 
+  // Deprecated
   $.fn.tufteBar.defaults = $.fn.tufteGraph.defaults;
 
-  $.tufteBar = {
+  $.tufteGraph = {
     // Add thousands separators to a number to make it look pretty.
     // 1000 -> 1,000
     formatNumber: function(nStr) {
@@ -65,6 +66,13 @@
     }
   }
 
+  $.tufteBar = {
+    formatNumber: function(nStr) {
+      console.log("DEPRECATED - please use $.tufteGraph.formatNumber");
+      return $.tufteGraph.formatNumber(nStr);
+    }
+  }
+
   //
   // Private functions
   //
@@ -73,8 +81,6 @@
     'line': {},
     'bar':  {}
   }
-  var line = graphTypes.line;
-  var bar  = graphTypes.bar;
 
   // This function should be applied to any option used from the options hash.
   // It allows options to be provided as either static values or functions which are
@@ -102,56 +108,8 @@
     }
   }
 
-  var drawGraph = function(plot, options, methods) {
-    var ctx = plot.ctx;
-    var axis = plot.axis;
 
-    pixel_scaling_function = function(axis) {
-      var scale = axis.pixelLength / (axis.max - axis.min);
-      return function (value) {
-        return (value - axis.min) * scale;
-      }
-    }
-
-    // These functions transform a value from plot coordinates to pixel coordinates
-    var t = {}
-    t.W = pixel_scaling_function(axis.x);
-    t.H = pixel_scaling_function(axis.y);
-    t.X = t.W;
-    // Y needs to invert the result since 0 in plot coords is bottom left, but 0 in pixel coords is top left
-    t.Y = function(y) { return axis.y.pixelLength - t.H(y) };
-    ctx.scale = t;
-    ctx.axis = axis;
-
-    // Iterate over each data point
-    $(options.data).each(function (index) {
-      var element = this;
-      var x = index + 0.5;
-      var all_y = toArray(element[0]);
-
-      if ($(all_y).any(function() { return isNaN(+this); })) {
-        throw("Non-numeric value provided for y: " + element[0]);
-      }
-
-      // Iterate over each data point for this line and render paths
-      $(all_y).each(function(stackedIndex) {
-        var optionResolver = function(option) { // Curry resolveOption for convenience
-          return resolveOption(option, element, index, stackedIndex, options);
-        }
-
-        methods.drawPoint(optionResolver, stackedIndex, x, this);
-
-        options.afterDraw.point(ctx, index, stackedIndex);
-      });
-
-      methods.drawStack(index, all_y, this, x);
-      options.afterDraw.stack(ctx, index);
-    });
-    methods.drawGraph();
-    options.afterDraw.graph(ctx);
-  }
-
-  bar.draw = function(plot, options) {
+  graphTypes.bar.draw = function(plot, options) {
     var lastY = 0;
 
     drawGraph(plot, options, {
@@ -202,7 +160,7 @@
     });
   }
 
-  line.draw = function(plot, options) {
+  graphTypes.line.draw = function(plot, options) {
     var paths = [];
 
     drawGraph(plot, options, {
@@ -226,6 +184,57 @@
       },
       drawGraph: function() {}
     });
+  }
+
+  // The fundamental graph drawing function. This is called by both the bar and
+  // line drawers, and they provide methods to implement key algorithms that they differ on.
+  var drawGraph = function(plot, options, methods) {
+    var ctx = plot.ctx;
+    var axis = plot.axis;
+
+    pixel_scaling_function = function(axis) {
+      var scale = axis.pixelLength / (axis.max - axis.min);
+      return function (value) {
+        return (value - axis.min) * scale;
+      }
+    }
+
+    // These functions transform a value from plot coordinates to pixel coordinates
+    var t = {}
+    t.W = pixel_scaling_function(axis.x);
+    t.H = pixel_scaling_function(axis.y);
+    t.X = t.W;
+    // Y needs to invert the result since 0 in plot coords is bottom left, but 0 in pixel coords is top left
+    t.Y = function(y) { return axis.y.pixelLength - t.H(y) };
+    ctx.scale = t;
+    ctx.axis = axis;
+
+    // Iterate over each data point
+    $(options.data).each(function (index) {
+      var element = this;
+      var x = index + 0.5;
+      var all_y = toArray(element[0]);
+
+      if ($(all_y).any(function() { return isNaN(+this); })) {
+        throw("Non-numeric value provided for y: " + element[0]);
+      }
+
+      // Iterate over each data point for this line and render paths
+      $(all_y).each(function(stackedIndex) {
+        var optionResolver = function(option) { // Curry resolveOption for convenience
+          return resolveOption(option, element, index, stackedIndex, options);
+        }
+
+        methods.drawPoint(optionResolver, stackedIndex, x, this);
+
+        options.afterDraw.point(ctx, index, stackedIndex);
+      });
+
+      methods.drawStack(index, all_y, this, x);
+      options.afterDraw.stack(ctx, index);
+    });
+    methods.drawGraph();
+    options.afterDraw.graph(ctx);
   }
 
   // If legend data has been provided, transform it into an
@@ -255,7 +264,7 @@
 
   // Calculates the range of the graph by looking for the
   // maximum y-value
-  bar.makeAxis = function(options) {
+  graphTypes.bar.makeAxis = function(options) {
     var axis = {
       x: {},
       y: {}
@@ -282,7 +291,7 @@
   // minimum and maximum y-value, then adding some padding
   // since the drawing of the graph will go outside this
   // bounds slightly.
-  line.makeAxis = function(options) {
+  graphTypes.line.makeAxis = function(options) {
     var axis = {
       x: {},
       y: {}
