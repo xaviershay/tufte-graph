@@ -127,6 +127,10 @@
         all_y = [element[0]];
       }
 
+      if ($(all_y).any(function() { return isNaN(+this); })) {
+        throw("Non-numeric value provided for y: " + element[0]);
+      }
+
       var lastY = 0;
 
       // Iterate over each data point for this line and render paths
