@@ -137,11 +137,11 @@
 
         methods.drawPoint(ctx, options, optionResolver, index, x, this);
 
-        options.afterDraw.point(i, index, ctx);
+        options.afterDraw.point(ctx, i, index);
       });
 
       methods.drawStack(ctx, options, i, all_y, this, x);
-      options.afterDraw.stack(i, ctx);
+      options.afterDraw.stack(ctx, i);
     });
     methods.drawGraph(plot, options);
     options.afterDraw.graph(ctx);
@@ -286,10 +286,19 @@
     axis.y.max = 0;
 
     $(options.data).each(function() {
-      var min_y = Math.min(this[0][0], this[0][1]); //totalValue(this[0]);
+      element = this;
+      if (element[0] instanceof Array) {
+        // This is a stacked bar, so the data is all good to go
+        all_y = element[0];
+      } else {
+        // This is a normal bar, wrap in an array to make it a stacked bar with one data point
+        all_y = [element[0]];
+      }
+
+      var min_y = Math.min.apply(Math, all_y); //totalValue(this[0]);
       if( min_y < axis.y.min ) axis.y.min = min_y;
 
-      var max_y = Math.max(this[0][0], this[0][1]); //totalValue(this[0]);
+      var max_y = Math.max.apply(Math, all_y); //totalValue(this[0]);
       if( max_y > axis.y.max ) axis.y.max = max_y;
     });
 

@@ -5,13 +5,14 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
     <script type="text/javascript" src="../raphael.js"></script>
+    <script type="text/javascript" src="../raphael.path.methods.js"></script>
     <script type="text/javascript" src="../jquery.enumerable.js"></script>
     <script type="text/javascript" src="../jquery.tufte-graph.js"></script>
     <link rel="stylesheet" href="../tufte-graph.css" type="text/css" media="screen" charset="utf-8" />
 
     <style>
       body { font-family: georgia; font-size 14px; }
-      .test-case { float: left; text-align: center; margin-right: 50px;}
+      .test-case { float: left; text-align: center; margin-right: 50px; }
       a, a:visited { color: black; }
       h2 { font-size: 1.2em; clear: both;}
       table { text-align: left; margin-bottom: 10px;}
@@ -103,6 +104,41 @@
           }
         });
 
+        $('#line-defaults-graph').tufteLine({
+          data: commonTestData
+        });
+
+        $('#line-stacked-graph').tufteLine({
+          data: stackedTestData
+        });
+
+        $('#line-callbacks-graph').tufteLine({
+          data: stackedTestData,
+          afterDraw: {
+            point: function(ctx, index, stackedIndex) {
+              var x = ctx.scale.X(index + 0.5);
+              var y = ctx.scale.Y(stackedTestData[index][0][stackedIndex]);
+              ctx.circle(x, y, 4).attr({
+                fill:   $.fn.tufteBar.defaults.color(index, stackedIndex, $.fn.tufteBar.defaults),
+                stroke: '#FFFFFF'
+              });
+            },
+            stack: function(ctx, index) {
+              if (index % 2 == 0) {
+                ctx.rect(ctx.scale.X(index), 0, ctx.scale.X(1), ctx.axis.y.pixelLength).attr({
+                  stroke: 'none',
+                  fill: '#EEEEEE'
+                }).toBack();
+              }
+            },
+            graph: function(ctx) {
+              ctx.rect(0, 0, ctx.axis.x.pixelLength, 10).attr({
+                fill: '#000000'
+              });
+            }
+          }
+        });
+
         var pass;
         pass = false;
         try {
@@ -168,37 +204,50 @@
     <h2>Bar</h2>
     <div class='test-case'>
       <h3>Default</h3>
-      <div id='defaults-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='defaults-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <div class='test-case'>
       <h3>Static properties</h3>
-      <div id='static-properties-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='static-properties-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <div class='test-case'>
       <h3>Dynamic properties</h3>
-      <div id='dynamic-properties-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='dynamic-properties-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <h2>Stacked Bar</h2>
     <div class='test-case'>
       <h3>Default</h3>
-      <div id='stacked-defaults-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='stacked-defaults-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <div class='test-case'>
       <h3>Dynamic</h3>
-      <div id='stacked-dynamic-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='stacked-dynamic-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <h2>Legends</h2>
     <div class='test-case'>
       <h3>Default</h3>
-      <div id='legend-defaults-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='legend-defaults-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <div class='test-case'>
       <h3>Dynamic</h3>
-      <div id='legend-dynamic-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='legend-dynamic-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <div class='test-case'>
       <h3>Use graph colors</h3>
-      <div id='legend-colors-graph' class='graph' style='width:200px; height: 150px'></div>
+      <div id='legend-colors-graph' class='graph' style='width:200px; height: 100px'></div>
+    </div>
+    <h2>Line</h2>
+    <div class='test-case'>
+      <h3>Default</h3>
+      <div id='line-defaults-graph' class='graph' style='width:200px; height: 100px'></div>
+    </div>
+    <div class='test-case'>
+      <h3>Stacked</h3>
+      <div id='line-stacked-graph' class='graph' style='width:200px; height: 100px'></div>
+    </div>
+    <div class='test-case'>
+      <h3>Callbacks</h3>
+      <div id='line-callbacks-graph' class='graph' style='width:200px; height: 100px'></div>
     </div>
     <h2>Error Handling</h2>
     <div class='test-case'>
