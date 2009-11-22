@@ -114,40 +114,30 @@
     ctx.axis = axis;
 
     // Iterate over each data point
-    $(options.data).each(function (i) {
+    $(options.data).each(function (index) {
       var element = this;
-      var x = i + 0.5;
-      var all_y = null;
-
-      if (element[0] instanceof Array) {
-        // This is a stacked bar, so the data is all good to go
-        all_y = element[0];
-      } else {
-        // This is a normal bar, wrap in an array to make it a stacked bar with one data point
-        all_y = [element[0]];
-      }
+      var x = index + 0.5;
+      var all_y = toArray(element[0]);
 
       if ($(all_y).any(function() { return isNaN(+this); })) {
         throw("Non-numeric value provided for y: " + element[0]);
       }
 
-      var lastY = 0;
-
       // Iterate over each data point for this line and render paths
-      $(all_y).each(function(index) {
+      $(all_y).each(function(stackedIndex) {
         var optionResolver = function(option) { // Curry resolveOption for convenience
-          return resolveOption(option, element, i, index, options);
+          return resolveOption(option, element, index, stackedIndex, options);
         }
 
-        methods.drawPoint(ctx, options, optionResolver, index, x, this);
+        methods.drawPoint(optionResolver, stackedIndex, x, this);
 
-        options.afterDraw.point(ctx, i, index);
+        options.afterDraw.point(ctx, index, stackedIndex);
       });
 
-      methods.drawStack(ctx, options, i, all_y, this, x);
-      options.afterDraw.stack(ctx, i);
+      methods.drawStack(index, all_y, this, x);
+      options.afterDraw.stack(ctx, index);
     });
-    methods.drawGraph(plot, options);
+    methods.drawGraph();
     options.afterDraw.graph(ctx);
   }
 
@@ -155,7 +145,7 @@
     var lastY = 0;
 
     drawFunc(plot, options, {
-      drawPoint: function(ctx, options, optionResolver, stackedIndex, x, y) {
+      drawPoint: function(optionResolver, stackedIndex, x, y) {
         var halfBar = optionResolver(options.barWidth) / 2;
         var left   = x - halfBar,
             width  = halfBar * 2,
@@ -165,14 +155,14 @@
         // Need to both fill and stroke the rect to make sure the whole area is covered
         // You get nasty artifacts otherwise
         var color = optionResolver(options.color);
-        var t = ctx.scale;
+        var t = plot.ctx.scale;
         var coords = [t.X(left), t.Y(top), t.W(width), t.H(height)];
 
-        ctx.rect(coords[0], coords[1], coords[2], coords[3]).attr({stroke: color, fill: color});
+        plot.ctx.rect(coords[0], coords[1], coords[2], coords[3]).attr({stroke: color, fill: color});
 
         lastY = lastY + y;
       },
-      drawStack: function(ctx, options, i, stackedY, element, x) {
+      drawStack: function(i, stackedY, element, x) {
         addLabel = function(klass, text, pos) {
           html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
           $(html).css(pos).appendTo( plot.target );
@@ -181,7 +171,7 @@
         var optionResolver = function(option) { // Curry resolveOption for convenience
           return resolveOption(option, element, i, options);
         }
-        var t = ctx.scale;
+        var t = plot.ctx.scale;
 
         addLabel('bar-label', optionResolver(options.barLabel), {
           left:   t.X(x - 0.5),
@@ -196,17 +186,28 @@
         lastY = 0;
 
       },
-      drawGraph: function(plot, options) {
+      drawGraph: function() {
         addLegend(plot, options);
       }
     });
+  }
+
+  function toArray(x) {
+    if (x instanceof Array) {
+      // This is a stacked graph, so the data is all good to go
+      return x;
+    } else {
+      // This is a normal graph, wrap in an array to make it a stacked graph with one data point
+      return [x];
+    }
   }
 
   line.draw = function(plot, options) {
     var paths = [];
 
     drawFunc(plot, options, {
-      drawPoint: function(ctx, options, optionResolver, index, x, y) {
+      drawPoint: function(optionResolver, index, x, y) {
+        var ctx = plot.ctx;
         var coords = [ctx.scale.X(x), ctx.scale.Y(y)];
 
         if (!paths[index])
@@ -216,10 +217,10 @@
 
         path.lineTo(coords[0], coords[1]);
       },
-      drawStack: function(ctx, options, i, stackedY) {
-        if (i == options.data.length - 1) {
-          $(stackedY).each(function(index) {
-            paths[index].lineTo(ctx.axis.x.pixelLength, ctx.scale.Y(this));
+      drawStack: function(index, stackedY) {
+        if (index == options.data.length - 1) {
+          $(toArray(options.data[index][0])).each(function(index) {
+            paths[index].lineTo(plot.ctx.axis.x.pixelLength, plot.ctx.scale.Y(this));
           });
         }
       },
@@ -268,16 +269,20 @@
 
     $(options.data).each(function() {
       var y = totalValue(this[0]);
-      if( y < axis.y.min ) throw("Negative values not supported");
-      if( y > axis.y.max ) axis.y.max = y;
+      if (y < axis.y.min ) throw("Negative values not supported for bar graphs");
+      if (y > axis.y.max ) axis.y.max = y;
     });
 
-    if( axis.x.max <= 0) throw("You must have at least one data point");
-    if( axis.y.max <= 0) throw("You must have at least one y-value greater than 0");
+    if (axis.x.max <= 0) throw("You must have at least one data point");
+    if (axis.y.max <= 0) throw("You must have at least one y-value greater than 0");
 
     return axis;
   }
 
+  // Calculates the range of the graph by looking for the
+  // minimum and maximum y-value, then adding some padding
+  // since the drawing of the graph will go outside this
+  // bounds slightly.
   line.makeAxis = function(options) {
     var axis = {
       x: {},
@@ -286,27 +291,20 @@
 
     axis.x.min = 0
     axis.x.max = options.data.length;
-    axis.y.min = 99999999999;
-    axis.y.max = 0;
+    axis.y.min = Infinity;
+    axis.y.max = -Infinity;
 
     $(options.data).each(function() {
-      element = this;
-      if (element[0] instanceof Array) {
-        // This is a stacked bar, so the data is all good to go
-        all_y = element[0];
-      } else {
-        // This is a normal bar, wrap in an array to make it a stacked bar with one data point
-        all_y = [element[0]];
-      }
+      var all_y = toArray(this[0]);
 
-      var min_y = Math.min.apply(Math, all_y); //totalValue(this[0]);
-      if( min_y < axis.y.min ) axis.y.min = min_y;
+      var min_y = Math.min.apply(Math, all_y);
+      if (min_y < axis.y.min ) axis.y.min = min_y;
 
-      var max_y = Math.max.apply(Math, all_y); //totalValue(this[0]);
-      if( max_y > axis.y.max ) axis.y.max = max_y;
+      var max_y = Math.max.apply(Math, all_y);
+      if (max_y > axis.y.max ) axis.y.max = max_y;
     });
 
-    if( axis.x.max <= 0) throw("You must have at least one data point");
+    if (axis.x.max <= 0) throw("You must have at least one data point");
 
     var range = axis.y.max - axis.y.min;
     axis.y.min = axis.y.min - range * 0.4;
