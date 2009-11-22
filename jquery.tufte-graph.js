@@ -3,36 +3,30 @@
   // Public interface
   //
 
-  // Creates a pretty bar graph. See index.html for documentation.
-  $.fn.tufteBar = function(options) {
-    var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
+  $.fn.tufteGraph = function(type, options) {
+    graph = graphTypes[type];
+    if (!graph)
+      throw("Graph type " + type + " not supported - try either 'bar', or 'line'");
+
+    var defaultCopy = $.extend(true, {}, $.fn.tufteGraph.defaults);
     var options =     $.extend(true, defaultCopy, options);
 
     return this.each(function () {
-      bar.draw(makePlot(bar, $(this), options), options);
+      graph.draw(makePlot(graph, $(this), options), options);
     });
   }
 
-  // Creates a pretty line graph. See integrations tests for examples.
-  $.fn.tufteLine = function(options) {
-    var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
-    var options =     $.extend(true, defaultCopy, options);
-
-    return this.each(function () {
-      line.draw(makePlot(line, $(this), options), options);
-    });
+  // Creates a pretty bar graph. See index.html for documentation.
+  $.fn.tufteBar = function(options) {
+    console.log("DEPRECATED - please use tufteGraph('bar', options) instead")
+    this.tufteGraph('bar', options);
   }
 
   // Defaults are exposed publically so you can reuse bits that you find
   // handy (the colors, for instance)
-  $.fn.tufteBar.defaults = {
-    barWidth:  0.8,
+  $.fn.tufteGraph.defaults = {
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
     color:     function(index, stackedIndex, options) { return options.colors[stackedIndex % options.colors.length]; },
-    barLabel:  function(index, stackedIndex) {
-      return $.tufteBar.formatNumber($.sum(toArray(this[0])));
-    },
-    axisLabel: function(index, stackedIndex) { return index; },
     legend: {
       color: function(index, options) { return options.colors[index % options.colors.length]; },
       label: function(index) { return this; }
@@ -41,8 +35,18 @@
       point: function() {},
       stack: function() {},
       graph: function() {}
+    },
+
+    bar: {
+      barWidth:  0.8,
+      barLabel:  function(index, stackedIndex) {
+        return $.tufteBar.formatNumber($.sum(toArray(this[0])));
+      },
+      axisLabel: function(index, stackedIndex) { return index; }
     }
   }
+
+  $.fn.tufteBar.defaults = $.fn.tufteGraph.defaults;
 
   $.tufteBar = {
     // Add thousands separators to a number to make it look pretty.
@@ -65,8 +69,12 @@
   // Private functions
   //
 
-  var line = {}
-  var bar  = {}
+  var graphTypes = {
+    'line': {},
+    'bar':  {}
+  }
+  var line = graphTypes.line;
+  var bar  = graphTypes.bar;
 
   // This function should be applied to any option used from the options hash.
   // It allows options to be provided as either static values or functions which are
@@ -148,7 +156,7 @@
 
     drawGraph(plot, options, {
       drawPoint: function(optionResolver, stackedIndex, x, y) {
-        var halfBar = optionResolver(options.barWidth) / 2;
+        var halfBar = optionResolver(options.bar.barWidth) / 2;
         var left   = x - halfBar,
             width  = halfBar * 2,
             top = lastY + y,
@@ -175,12 +183,12 @@
         }
         var t = plot.ctx.scale;
 
-        addLabel('bar-label', optionResolver(options.barLabel), {
+        addLabel('bar-label', optionResolver(options.bar.barLabel), {
           left:   t.X(x - 0.5),
           bottom: t.H(lastY),
           width:  t.W(1)
         });
-        addLabel('axis-label', optionResolver(options.axisLabel), {
+        addLabel('axis-label', optionResolver(options.bar.axisLabel), {
           left:  t.X(x - 0.5),
           top:   t.Y(0),
           width: t.W(1)
