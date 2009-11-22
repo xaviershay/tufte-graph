@@ -3,10 +3,7 @@
   // Public interface
   //
 
-  var line = {}
-  var bar = {}
-
-  // The main event - creates a pretty graph. See index.html for documentation.
+  // Creates a pretty bar graph. See index.html for documentation.
   $.fn.tufteBar = function(options) {
     var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
     var options =     $.extend(true, defaultCopy, options);
@@ -16,6 +13,7 @@
     });
   }
 
+  // Creates a pretty line graph. See integrations tests for examples.
   $.fn.tufteLine = function(options) {
     var defaultCopy = $.extend(true, {}, $.fn.tufteBar.defaults);
     var options =     $.extend(true, defaultCopy, options);
@@ -32,7 +30,7 @@
     colors:    ['#07093D', '#0C0F66', '#476FB2'],
     color:     function(index, stackedIndex, options) { return options.colors[stackedIndex % options.colors.length]; },
     barLabel:  function(index, stackedIndex) {
-      return $.tufteBar.formatNumber(totalValue(this[0]));
+      return $.tufteBar.formatNumber($.sum(toArray(this[0])));
     },
     axisLabel: function(index, stackedIndex) { return index; },
     legend: {
@@ -67,6 +65,9 @@
   // Private functions
   //
 
+  var line = {}
+  var bar  = {}
+
   // This function should be applied to any option used from the options hash.
   // It allows options to be provided as either static values or functions which are
   // evaluated each time they are used
@@ -83,16 +84,17 @@
     return $.isFunction(option) ? option.apply(element, toArray.apply(arguments).slice(2, arguments.length)) : option;
   }
 
-  // Returns the total value of a bar, for labeling or plotting. Y values can either be
-  // a single number (for a normal graph), or an array of numbers (for a stacked graph)
-  function totalValue(value) {
-    if (value instanceof Array)
-      return $.sum(value);
-    else
-      return value;
+  function toArray(x) {
+    if (x instanceof Array) {
+      // This is a stacked graph, so the data is all good to go
+      return x;
+    } else {
+      // This is a normal graph, wrap in an array to make it a stacked graph with one data point
+      return [x];
+    }
   }
 
-  var drawFunc = function(plot, options, methods) {
+  var drawGraph = function(plot, options, methods) {
     var ctx = plot.ctx;
     var axis = plot.axis;
 
@@ -144,7 +146,7 @@
   bar.draw = function(plot, options) {
     var lastY = 0;
 
-    drawFunc(plot, options, {
+    drawGraph(plot, options, {
       drawPoint: function(optionResolver, stackedIndex, x, y) {
         var halfBar = optionResolver(options.barWidth) / 2;
         var left   = x - halfBar,
@@ -192,20 +194,10 @@
     });
   }
 
-  function toArray(x) {
-    if (x instanceof Array) {
-      // This is a stacked graph, so the data is all good to go
-      return x;
-    } else {
-      // This is a normal graph, wrap in an array to make it a stacked graph with one data point
-      return [x];
-    }
-  }
-
   line.draw = function(plot, options) {
     var paths = [];
 
-    drawFunc(plot, options, {
+    drawGraph(plot, options, {
       drawPoint: function(optionResolver, index, x, y) {
         var ctx = plot.ctx;
         var coords = [ctx.scale.X(x), ctx.scale.Y(y)];
@@ -227,7 +219,6 @@
       drawGraph: function() {}
     });
   }
-
 
   // If legend data has been provided, transform it into an
   // absolutely positioned table placed at the top right of the graph
@@ -268,7 +259,7 @@
     axis.y.max = 0;
 
     $(options.data).each(function() {
-      var y = totalValue(this[0]);
+      var y = $.sum(toArray(this[0]));
       if (y < axis.y.min ) throw("Negative values not supported for bar graphs");
       if (y > axis.y.max ) axis.y.max = y;
     });
