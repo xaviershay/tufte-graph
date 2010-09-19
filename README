@@ -1,1 +1,5 @@
-See index.html
+= This Branch
+
+Adds support for line graphs. See the integration tests for examples. I am currently not using this in production, and want to make sure of the API before I merge it back into master.
+
+See index.html for more general TufteGraph info.
