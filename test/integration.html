@@ -16,6 +16,8 @@
       h2 { font-size: 1.2em; clear: both;}
       table { text-align: left; margin-bottom: 10px;}
       .graph .label { font-size: 0.8em; }
+      .bar-A { color: #82293B; }
+      .bar-B { color: #E57536; }
     </style>
 
     <script type="text/javascript">
@@ -100,6 +102,16 @@
           colors: ['#82293B', '#E57536', '#FFBE33'],
           legend: {
             data: ["A", "B", "C"]
+          }
+        });
+
+        $('#css-colors-graph').tufteBar({
+          data: commonTestData,
+          color: function() { 
+            $('body').append("<div id='colorhack' class='bar-" + this[1].label + "'></div>");
+            var barcolor = $('#colorhack').css("color");
+            $('#colorhack').remove();
+            return barcolor 
           }
         });
         
@@ -200,6 +212,11 @@
       <h3>Use graph colors</h3>
       <div id='legend-colors-graph' class='graph' style='width:200px; height: 150px'></div>
     </div>
+    <h2>Colors from CSS</h2>
+    <div class='test-case'>
+      <div id='css-colors-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
+
     <h2>Error Handling</h2>
     <div class='test-case'>
       <div id='error-graph' style='width:200px; height: 150px; display: none;'></div>
