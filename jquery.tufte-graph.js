@@ -98,11 +98,11 @@
       }
 
       var lastY = 0;
-
+      
       pixel_scaling_function = function(axis) {
-        var scale = axis.pixelLength / (axis.max - axis.min);
+        var scale = axis.pixelLength / (Math.abs(axis.max - axis.min));
         return function (value) {
-          return (value - axis.min) * scale;
+          return value * scale;
         }
       }
 
@@ -124,35 +124,55 @@
         var halfBar = optionResolver(options.barWidth) / 2;
         var left   = x - halfBar,
             width  = halfBar * 2,
-            top = lastY + y,
-            height = y;
+            height = Math.abs(y);
 
         // Need to both fill and stroke the rect to make sure the whole area is covered
         // You get nasty artifacts otherwise
         var color = optionResolver(options.color);
-        var coords = [t.X(left), t.Y(top), t.W(width), t.H(height)];
-
+        if( y > 0 ) {
+            var top = lastY + y + Math.abs(axis.y.min);
+            var coords = [t.X(left), t.Y(top), t.W(width), t.H(height)];
+        } else {
+            var top = lastY + Math.abs(axis.y.min);
+            var coords = [t.X(left), t.Y(top), t.W(width), t.H(height)];        
+        }
+        
         ctx.rect(coords[0], coords[1], coords[2], coords[3]).attr({stroke: color, fill: color});
 
-        lastY = lastY + y;
+        if( (lastY >= 0 && y >= 0) || (lastY <= 0 && y <= 0) ) {
+            lastY = lastY + y;    
+        } else {
+            lastY = 0;
+        }
+        
       });
 
       addLabel = function(klass, text, pos) {
         html = '<div style="position:absolute;" class="label ' + klass + '">' + text + "</div>";
-        $(html).css(pos).appendTo( plot.target );        
+        $(html).css(pos).appendTo( plot.target );
+      }
+      
+      getLabelHeight = function( klass ) {
+          // create an invisible div to get the height
+          if( $('.' + klass).length === 0 ) {
+            html = '<div style="display:none" class="label ' + klass + '">empty label</div>';
+            $(html).appendTo( plot.target );
+          }
+          return $('.' + klass).height();
       }
 
       var optionResolver = function(option) { // Curry resolveOption for convenience
         return resolveOption(option, element, i, options);
       }
+      
       addLabel('bar-label', optionResolver(options.barLabel), {
         left:   t.X(x - 0.5),
-        bottom: t.H(lastY),
+        bottom: (lastY >= 0) ? t.H(lastY + Math.abs(axis.y.min)) : t.H(lastY + Math.abs(axis.y.min)) - 2 * getLabelHeight('bar-label'),
         width:  t.W(1)
       });
       addLabel('axis-label', optionResolver(options.axisLabel), {
         left:  t.X(x - 0.5),
-        top:   t.Y(0),
+        top:   t.Y(0) + 2 * getLabelHeight('axis-label'),
         width: t.W(1)
       });
     });
@@ -199,12 +219,12 @@
 
     $(options.data).each(function() {
       var y = totalValue(this[0]);
-      if( y < axis.y.min ) throw("Negative values not supported");
+      //if( y < axis.y.min ) throw("Negative values not supported");
       if( y > axis.y.max ) axis.y.max = y;
+      if( y < axis.y.min ) axis.y.min = y;
     });
     
     if( axis.x.max <= 0) throw("You must have at least one data point");
-    if( axis.y.max <= 0) throw("You must have at least one y-value greater than 0");
 
     return axis;
   }
