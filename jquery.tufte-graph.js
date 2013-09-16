@@ -223,7 +223,6 @@
 
     $(options.data).each(function() {
       var y = totalValue(this[0]);
-
       if( y > axis.y.max ) axis.y.max = y;
       if( y < axis.y.min ) axis.y.min = y;
     });
