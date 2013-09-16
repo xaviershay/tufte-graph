@@ -39,6 +39,23 @@
           [[0.0, 0.0, 0.0], {label: 'D'}],
         ]
 
+        commonNegativeTestData = [
+          [1000, {label: 'A'}],
+          [-1300, {label: 'B'}],
+          [3600, {label: 'C'}],
+          [-4000, {label: 'D'}],
+          [5200, {label: 'E'}],
+          [-7000, {label: 'F', color: '#FFBE33'}],
+          [0,    {label: 'G'}]
+        ]
+
+        stackedNegativeTestData = [
+          [[-2.0, -1.0, -0.6], {label: 'A'}],
+          [[2.4, 0.9, 2.0], {label: 'B'}],
+          [[-1.5, -2.6, -1.4], {label: 'C', colors: $.fn.tufteBar.defaults.colors}],
+          [[0.0, 0.0, 0.0], {label: 'D'}],
+        ]
+
         $('#defaults-graph').tufteBar({
           data: commonTestData 
         });
@@ -61,6 +78,10 @@
           }
         });
 
+        $('#negative-graph').tufteBar({
+          data: commonNegativeTestData 
+        });
+
         $('#stacked-defaults-graph').tufteBar({
           data: [
             [[2.0, 1.0, 0.6]],
@@ -77,6 +98,10 @@
           color:     function(i, stackedIndex) { 
             return (this[1].colors || ['#82293B', '#E57536', '#FFBE33'])[stackedIndex % 3] 
           }
+        });
+
+        $('#stacked-negative-graph').tufteBar({
+          data: stackedNegativeTestData 
         });
 
         $('#legend-defaults-graph').tufteBar({
@@ -190,6 +215,10 @@
       <h3>Dynamic properties</h3>
       <div id='dynamic-properties-graph' class='graph' style='width:200px; height: 150px'></div>
     </div>
+    <div class='test-case'>
+      <h3>Negative Values</h3>
+      <div id='negative-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
     <h2>Stacked Bar</h2>
     <div class='test-case'>
       <h3>Default</h3>
@@ -198,6 +227,10 @@
     <div class='test-case'>
       <h3>Dynamic</h3>
       <div id='stacked-dynamic-graph' class='graph' style='width:200px; height: 150px'></div>
+    </div>
+    <div class='test-case'>
+      <h3>Default</h3>
+      <div id='stacked-negative-graph' class='graph' style='width:200px; height: 150px'></div>
     </div>
     <h2>Legends</h2>
     <div class='test-case'>
