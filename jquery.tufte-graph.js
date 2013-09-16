@@ -98,7 +98,7 @@
       }
 
       var lastY = 0;
-      
+
       pixel_scaling_function = function(axis) {
         var scale = axis.pixelLength / (Math.abs(axis.max - axis.min));
         return function (value) {
@@ -165,9 +165,13 @@
         return resolveOption(option, element, i, options);
       }
       
+      var barLabelBottom = (lastY >= 0) ?
+                              t.H(lastY + Math.abs(axis.y.min)) :
+                              t.H(lastY + Math.abs(axis.y.min)) - 2 * getLabelHeight('bar-label')
+
       addLabel('bar-label', optionResolver(options.barLabel), {
         left:   t.X(x - 0.5),
-        bottom: (lastY >= 0) ? t.H(lastY + Math.abs(axis.y.min)) : t.H(lastY + Math.abs(axis.y.min)) - 2 * getLabelHeight('bar-label'),
+        bottom: barLabelBottom,
         width:  t.W(1)
       });
       addLabel('axis-label', optionResolver(options.axisLabel), {
@@ -219,7 +223,7 @@
 
     $(options.data).each(function() {
       var y = totalValue(this[0]);
-      //if( y < axis.y.min ) throw("Negative values not supported");
+
       if( y > axis.y.max ) axis.y.max = y;
       if( y < axis.y.min ) axis.y.min = y;
     });
